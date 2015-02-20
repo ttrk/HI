@@ -21,6 +21,8 @@ git status   #changes after the last commit
 git log             #list of commits
 git log -p          #list of commits with changes in code
 git log --stat --summary 
+git diff
+git diff --cached
 
 # put all recently created files into commit list
 # new files are not added to commit automatically
