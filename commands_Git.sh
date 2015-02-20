@@ -22,7 +22,8 @@ git log --stat --summary
 git add .
 
 # commit
-# better do not execute commit from this script, do it on shell
+# better do not execute this command from this script, do it on shell. Because this command requires additional input such as username and password.
 
 # push changes to remote repo.
 git push -u origin master   # push what my "master" branch here to the remote repo. that I called "origin"
+# better do not execute this command from this script, do it on shell. Because this command requires additional input such as username and password.
