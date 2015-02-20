@@ -11,7 +11,8 @@ git remote add origin https://github.com/ttrk/HI.git   # the repository will be 
 git remote
 git remote -v # show also the URL
 
-# pull from remote
+# pull from remote if there is something new
+git fetch origin
 git pull
 
 # check changes/commits etc. 

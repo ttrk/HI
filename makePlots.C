@@ -40,6 +40,25 @@ using  std::endl;
  *
  * */
 
+/*
+ * structure of the macro
+ *
+ * 1. initialize variables
+ * 		Ex. file names, I/O files,
+ *
+ *
+ *		- variables for the names of the branches : const char*
+ *		- variables for the numerical values of the cuts : double/float/int
+ *		- histograms to be plotted : TH1D
+ *		- selection cuts : TCut
+ *
+ *		Ex. :
+ *			const char *br_photon_eta = "eta";		// name of the eta branch
+ *			float lt_eta = 1.44 ;					// eta less than 1.44
+ *			TCut  cut_eta = Form("abs(%s)<(%f)", br_photon_eta, lt_eta);
+ * 2.
+ * */
+
 const int MAXPHOTONS = 50;
 const double maxPt = 1313;
 
@@ -64,20 +83,24 @@ void makePlots()
 
 	//tree_photon->Draw("pt");
 
+	const char *br_photon_nPhotons = "nPhotons";
 	const char *br_photon_pt = "pt";
 	const char *br_photon_eta = "eta";
+
 	Int_t photon_n;
 	Float_t photon_pt[MAXPHOTONS];
-	tree_photon->SetBranchAddress("nPhotons",&photon_n);
-	tree_photon->SetBranchAddress("pt",photon_pt);
+	tree_photon->SetBranchAddress(br_photon_nPhotons,	&photon_n);
+	tree_photon->SetBranchAddress(br_photon_pt,			 photon_pt);
 
 	TFile *outFile = new TFile(Form("hist_out_%s.root",type),"RECREATE");
-	TH1D *h_max_photon_pt = new TH1D("max_photon_pt","; max photon p_{T} (GeV)",nBins,0,maxPt);
-	TH1D *h_index_max_photon_pt = new TH1D("index_max_photon_pt","; index of max photon p_{T}",nBins,0,maxPt);
-	TH1D *h_photon_pt = new TH1D("photon_pt","; photon p_{T} (GeV)",nBins,0,maxPt);
+	TH1D *h_max_photon_pt		 = new TH1D("max_photon_pt",		"; max photon p_{T} (GeV)"		,nBins,0,maxPt);
+	TH1D *h_index_max_photon_pt  = new TH1D("index_max_photon_pt",	"; index of max photon p_{T}"	,nBins,0,maxPt);
+	TH1D *h_photon_pt			 = new TH1D("photon_pt",			"; photon p_{T} (GeV)"			,nBins,0,maxPt);
 
-	TH1D *h_photon_pt_cut = new TH1D("photon_pt_cut","; photon p_{T} with cut (GeV)",nBins,0,maxPt);
-	TCut cut1= Form("abs(eta)<1.44");
+	TH1D *h_photon_pt_cut 		 = new TH1D("photon_pt_cut",		"; photon p_{T} with cut (GeV)"	,nBins,0,maxPt);
+
+	float lt_eta = 1.44 ;
+	TCut cut_eta= Form("abs(%s)<(%f)", br_photon_eta, lt_eta);
 
 	outFile->cd();
 
@@ -104,13 +127,13 @@ void makePlots()
         	h_index_max_photon_pt->Fill(max_pt_photons_index);
 		}
 	}
-	tree_photon->Draw(Form("%s>>%s","pt",h_photon_pt->GetName()));
-	tree_photon->Draw(Form("%s>>%s","pt",h_photon_pt_cut->GetName()),cut1);
+	tree_photon->Draw(Form("%s>>%s",br_photon_pt,	h_photon_pt->GetName())			    	);
+	tree_photon->Draw(Form("%s>>%s",br_photon_pt,	h_photon_pt_cut->GetName()),	cut_eta );
 
-	h_max_photon_pt->Write();
-	h_index_max_photon_pt->Write();
-	h_photon_pt->Write();
-	h_photon_pt_cut->Write();
+	h_max_photon_pt			->Write();
+	h_index_max_photon_pt	->Write();
+	h_photon_pt				->Write();
+	h_photon_pt_cut			->Write();
 	std::cout << "histograms written" << std::endl;
 
 	outFile->Write();

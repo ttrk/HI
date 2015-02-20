@@ -26,6 +26,7 @@ void mergeCuts(TCut cut, TCut* cuts)
 {
 	// http://stackoverflow.com/questions/4108313/how-do-i-find-the-length-of-an-array
 	int len = (sizeof (cuts) / sizeof (*cuts));
+	mergeCuts(cut,cuts,len);
 }
 
 /*
