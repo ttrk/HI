@@ -1,6 +1,7 @@
 #!/bin/sh
 
 #http://stackoverflow.com/questions/3598664/creating-a-shell-script-to-run-java-program?rq=1
+#http://git-scm.com/docs/gittutorial
 
 #clone repository
 git clone https://github.com/ttrk/HI.git
@@ -9,6 +10,9 @@ git remote add origin https://github.com/ttrk/HI.git   # the repository will be 
 # check what repositories are added as remote
 git remote
 git remote -v # show also the URL
+
+# pull from remote
+git pull
 
 # check changes/commits etc. 
 # basically report what happened
