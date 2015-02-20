@@ -1,19 +1,14 @@
 #include <TFile.h>
 #include <TTree.h>
-#include <TChain.h>
 #include <TCanvas.h>
-#include <TLegend.h>
 #include <TH1D.h>
-#include <TH2D.h>
-#include <TLatex.h>
-#include <TGraph.h>
 #include <TString.h>
-#include <TLegendEntry.h>
-#include <TGraphAsymmErrors.h>
+#include <TCut.h>
 
-#include <vector>
 #include <iostream>
 #include <map>
+
+//#include "makePlotsUtil.h"
 
 // necessary for GCC C++ Compiler to work
 #include <string>
@@ -21,7 +16,6 @@ using  std::string;
 using  std::cout;
 using  std::endl;
 //
-
 
 /*
  There are several introductory projects that the photon analysis needs to complete in order to update the pPb results.
@@ -41,6 +35,10 @@ using  std::endl;
     perform a cross check showing the ratio of all the basic kinematic distributions from the first half of the run ( run < 211313 ) over the second half of the run ( run > 211313 )
     for each of our selection cuts, tell us the number of passing objects or events which pass that cut (for events, photons, and jets)
  */
+/*
+ * cuts for photons :
+ *
+ * */
 
 const int MAXPHOTONS = 50;
 const double maxPt = 1313;
@@ -66,6 +64,8 @@ void makePlots()
 
 	//tree_photon->Draw("pt");
 
+	const char *br_photon_pt = "pt";
+	const char *br_photon_eta = "eta";
 	Int_t photon_n;
 	Float_t photon_pt[MAXPHOTONS];
 	tree_photon->SetBranchAddress("nPhotons",&photon_n);
@@ -75,6 +75,9 @@ void makePlots()
 	TH1D *h_max_photon_pt = new TH1D("max_photon_pt","; max photon p_{T} (GeV)",nBins,0,maxPt);
 	TH1D *h_index_max_photon_pt = new TH1D("index_max_photon_pt","; index of max photon p_{T}",nBins,0,maxPt);
 	TH1D *h_photon_pt = new TH1D("photon_pt","; photon p_{T} (GeV)",nBins,0,maxPt);
+
+	TH1D *h_photon_pt_cut = new TH1D("photon_pt_cut","; photon p_{T} with cut (GeV)",nBins,0,maxPt);
+	TCut cut1= Form("abs(eta)<1.44");
 
 	outFile->cd();
 
@@ -102,11 +105,12 @@ void makePlots()
 		}
 	}
 	tree_photon->Draw(Form("%s>>%s","pt",h_photon_pt->GetName()));
-	//tree_photon->Draw("pt");
+	tree_photon->Draw(Form("%s>>%s","pt",h_photon_pt_cut->GetName()),cut1);
 
 	h_max_photon_pt->Write();
 	h_index_max_photon_pt->Write();
 	h_photon_pt->Write();
+	h_photon_pt_cut->Write();
 	std::cout << "histograms written" << std::endl;
 
 	outFile->Write();
