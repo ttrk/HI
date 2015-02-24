@@ -62,7 +62,7 @@ using  std::endl;
 const int MAXPHOTONS = 50;
 const double maxPt = 1313;
 
-void makePlots()
+void photonCuts()
 {
 	const TString input_File = "/mnt/hadoop/cms/store/user/luck/2014-photon-forests/pPb_DATA_photon30trig_localJEC_v1.root";
 	//const TString jet_Directory="akVs3CaloJetAnalyzer/";
@@ -142,6 +142,6 @@ void makePlots()
 
 int main()
 {
-	makePlots();
+	photonCuts();
 	return 0;
 }

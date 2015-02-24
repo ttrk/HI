@@ -7,6 +7,12 @@
 git clone https://github.com/ttrk/HI.git
 git remote add origin https://github.com/ttrk/HI.git   # the repository will be referred as "remote" from now on
 
+#clone other repositories to the upper directory
+(cd ..; git clone https://github.com/CmsHI/HiForestAnalysis.git)
+(cd ..; git clone https://github.com/CmsHI/gammaJetAnalysis.git)
+# how to run commands from another directory
+# http://superuser.com/questions/271986/execute-a-command-from-another-directory-in-bash
+
 # check what repositories are added as remote
 git remote
 git remote -v # show also the URL
