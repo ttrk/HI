@@ -24,20 +24,20 @@ Hey guys,
 
 Here's a summary of the cuts required at each step, and attached is the short C macro I wrote while you watched using the HiForestAnalysis class. You can find the HiForestAnalysis class here: https://github.com/CmsHI/HiForestAnalysis
 
-    abs(eta) < 1.44
-    leading photon in the event
-    spike rejection cuts
-        sigmaIphiIphi > 0.002
-        sigmaIetaIeta > 0.002
-        swissCross < 0.9
-        abs(seedTime) < 3
-    Isolation Cuts
-        ecalIso < 4.2
-        hcalIso < 2.2
-        trackIso < 2.0
-        hadronicOverEm < 0.1
-    purity enhancement cut
-        sigmaIetaIeta < 0.01
+    1. abs(eta) < 1.44
+    2. leading photon in the event
+    3. spike rejection cuts
+        	sigmaIphiIphi > 0.002
+        	sigmaIetaIeta > 0.002
+        	swissCross < 0.9
+        	abs(seedTime) < 3
+    4. Isolation Cuts
+        	ecalIso < 4.2
+        	hcalIso < 2.2
+        	trackIso < 2.0
+        	hadronicOverEm < 0.1
+    5. purity enhancement cut
+        	sigmaIetaIeta < 0.01
 
 At each step, please count the photons, and make distributions for the pt, eta, and phi. Also make distributions of the jets with pt > 30 and abs(eta) < 3.0 in each event for number of jets per event, pt, eta, and phi.
 
@@ -86,8 +86,21 @@ Alex
  * 2.
  * */
 
-const int MAXPHOTONS = 50;
-const double maxPt = 1313;
+const float cut_eta = 1.44;
+// spike rejection
+const float cut_sigmaIphiIphi = 0.002;
+const float cut_sigmaIetaIeta_gt = 0.002;
+const float cut_swissCross = 0.9;
+const float cut_seedTime = 3;
+// Isolation
+const float cut_ecalIso = 4.2;
+const float cut_hcalIso = 2.2;
+const float cut_trackIso = 2.0;
+const float cut_hadronicOverEm = 0.1;
+// purity enhancement
+const float cut_sigmaIetaIeta_lt = 0.01;
+
+
 
 void photonCuts()
 {
@@ -101,25 +114,94 @@ void photonCuts()
 
   c->InitTree();
 
+  bool passed_eta;
+  bool passed_spike_reject;
+  bool passed_iso;
+  bool passed_purity;
+
+  int count_after_eta=0;			// number of events whose leading photon passes eta cut
+  int count_after_spike_reject=0;	// number of events whose leading photon passes spike rejection cut and previous cuts
+  int count_after_iso=0;			// number of events whose leading photon passes isolation cut and previous cuts
+  int count_after_purity=0;			// number of events whose leading photon passes purity enhancement cut and previous cuts
+
   std::cout << "number of entries: " << c->GetEntries() << std::endl;
 
   TCanvas *c1 = new TCanvas();
   c->photonTree->Draw("pt");
 
-  TH1D *photon_pt = new TH1D("photon_pt",";p_{T}",100, 0, 200);
 
-  for( Long64_t i = 0; i < 10000; ++i)
+  TH1D *photon_pt_after_eta = new TH1D("photon_pt_after_eta",";p_{T}",100, 0, 200);
+  TH1D *photon_pt_after_spike_reject = new TH1D("photon_pt_after_spike_reject",";p_{T}",100, 0, 200);
+  TH1D *photon_pt_after_iso = new TH1D("photon_pt_after_iso",";p_{T}",100, 0, 200);
+  TH1D *photon_pt_after_purity = new TH1D("photon_pt_after_purity",";p_{T}",100, 0, 200);
+
+  Long64_t entries = c->photonTree->GetEntries();
+//    Long64_t entries = 10000;	// work with a smaller set to get faster results
+  for( Long64_t i = 0; i < entries; ++i)
   {
-    c->GetEntry(i);
+	  c->GetEntry(i);
 
-    for( int j = 0; j < c->photon.nPhotons; ++j)
-    {
-      if(TMath::Abs(c->photon.eta[j]) > 1.44) continue;
-      photon_pt->Fill(c->photon.pt[j]);
-      break;
-    }
+	  for( int j = 0; j < c->photon.nPhotons; ++j)
+	  {
+		  passed_eta=false;
+		  passed_spike_reject=false;
+		  passed_iso=false;
+		  passed_purity=false;
+
+		  passed_eta = TMath::Abs(c->photon.eta[j]) < cut_eta;
+
+		  // eta cut
+		  if(passed_eta)
+		  {
+			  count_after_eta++;
+			  photon_pt_after_eta->Fill(c->photon.pt[j]);
+
+			  // spike rejection
+			  passed_spike_reject = (c->photon.sigmaIphiIphi[j] 			> cut_sigmaIphiIphi &&
+					  	  	  	  	 c->photon.sigmaIetaIeta[j] 			> cut_sigmaIetaIeta_gt &&
+									 c->photon.swissCrx[j]      			< cut_swissCross    &&
+									 TMath::Abs(c->photon.seedTime[j])		< cut_seedTime);
+			  if (passed_spike_reject)
+			  {
+				  count_after_spike_reject++;
+				  photon_pt_after_spike_reject->Fill(c->photon.pt[j]);
+
+				  // isolation
+// NOTE : not sure which branch to pick for ecalIso, hcalIso, trackIso
+				  passed_iso = (c->photon.ecalRecHitSumEtConeDR04[j] < cut_ecalIso	&&
+					  	  	    c->photon.hcalTowerSumEtConeDR04[j]  < cut_hcalIso	&&
+								c->photon.trkSumPtSolidConeDR04[j]   < cut_trackIso	&&
+								c->photon.hadronicOverEm     	     < cut_hadronicOverEm);
+				  if (passed_iso)
+				  {
+					  count_after_iso++;
+					  photon_pt_after_iso->Fill(c->photon.pt[j]);
+
+					  // purity enhancement
+					  passed_purity = c->photon.sigmaIetaIeta[j] < cut_sigmaIetaIeta_lt ;
+					  if (passed_purity)
+					  {
+						  count_after_purity++;
+						  photon_pt_after_purity->Fill(c->photon.pt[j]);
+					  }
+				  }
+			  }
+			  break;	// only leading photon is selected.
+		  }
+	  }
   }
 
   TCanvas *c2 = new TCanvas();
-  photon_pt->Draw();
+  photon_pt_after_eta->Draw();
+  TCanvas *c3 = new TCanvas();
+  photon_pt_after_spike_reject->Draw();
+  TCanvas *c4 = new TCanvas();
+  photon_pt_after_iso->Draw();
+  TCanvas *c5 = new TCanvas();
+  photon_pt_after_purity->Draw();
+
+  cout << " count after eta cut : "<< count_after_eta << endl;
+  cout << " count after spike rejection cut : "<< count_after_spike_reject << endl;
+  cout << " count after isolation cut : "<< count_after_iso << endl;
+  cout << " count after purity enhancement cut : "<< count_after_purity << endl;
 }
