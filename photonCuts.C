@@ -135,8 +135,8 @@ void photonCuts()
   TH1D *photon_pt_after_iso = new TH1D("photon_pt_after_iso",";p_{T}",100, 0, 200);
   TH1D *photon_pt_after_purity = new TH1D("photon_pt_after_purity",";p_{T}",100, 0, 200);
 
-  Long64_t entries = c->photonTree->GetEntries();
-//    Long64_t entries = 10000;	// work with a smaller set to get faster results
+//  Long64_t entries = c->photonTree->GetEntries();
+    Long64_t entries = 10000;	// work with a smaller set to get faster results
   for( Long64_t i = 0; i < entries; ++i)
   {
 	  c->GetEntry(i);
@@ -167,11 +167,10 @@ void photonCuts()
 				  photon_pt_after_spike_reject->Fill(c->photon.pt[j]);
 
 				  // isolation
-// NOTE : not sure which branch to pick for ecalIso, hcalIso, trackIso
 				  passed_iso = (c->photon.ecalRecHitSumEtConeDR04[j] < cut_ecalIso	&&
 					  	  	    c->photon.hcalTowerSumEtConeDR04[j]  < cut_hcalIso	&&
-								c->photon.trkSumPtSolidConeDR04[j]   < cut_trackIso	&&
-								c->photon.hadronicOverEm     	     < cut_hadronicOverEm);
+								c->photon.trkSumPtHollowConeDR04[j]  < cut_trackIso	&&
+								c->photon.hadronicOverEm[j]   	     < cut_hadronicOverEm);
 				  if (passed_iso)
 				  {
 					  count_after_iso++;
