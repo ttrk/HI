@@ -155,6 +155,15 @@ void photonCuts()
 		  passed_purity=false;
 
 		  passed_eta = TMath::Abs(c->photon.eta[j]) < cut_eta;
+		  passed_spike_reject = (c->photon.sigmaIphiIphi[j] 			> cut_sigmaIphiIphi &&
+				  	  	  	  	 c->photon.sigmaIetaIeta[j] 			> cut_sigmaIetaIeta_gt &&
+								 c->photon.swissCrx[j]      			< cut_swissCross    &&
+								 TMath::Abs(c->photon.seedTime[j])		< cut_seedTime);
+		  passed_iso = (c->photon.ecalRecHitSumEtConeDR04[j] < cut_ecalIso	&&
+			  	  	    c->photon.hcalTowerSumEtConeDR04[j]  < cut_hcalIso	&&
+						c->photon.trkSumPtHollowConeDR04[j]  < cut_trackIso	&&
+						c->photon.hadronicOverEm[j]   	     < cut_hadronicOverEm);
+		  passed_purity = c->photon.sigmaIetaIeta[j] < cut_sigmaIetaIeta_lt ;
 
 		  // eta cut
 		  if(passed_eta)
@@ -163,38 +172,28 @@ void photonCuts()
 			  photon_pt_after_eta->Fill(c->photon.pt[j]);
 			  photon_eta_after_eta->Fill(c->photon.eta[j]);
 			  photon_phi_after_eta->Fill(c->photon.phi[j]);
-
-			  // spike rejection
-			  passed_spike_reject = (c->photon.sigmaIphiIphi[j] 			> cut_sigmaIphiIphi &&
-					  	  	  	  	 c->photon.sigmaIetaIeta[j] 			> cut_sigmaIetaIeta_gt &&
-									 c->photon.swissCrx[j]      			< cut_swissCross    &&
-									 TMath::Abs(c->photon.seedTime[j])		< cut_seedTime);
-			  if (passed_spike_reject)
-			  {
-				  count_after_spike_reject++;
-				  photon_pt_after_spike_reject->Fill(c->photon.pt[j]);
-
-				  // isolation
-				  passed_iso = (c->photon.ecalRecHitSumEtConeDR04[j] < cut_ecalIso	&&
-					  	  	    c->photon.hcalTowerSumEtConeDR04[j]  < cut_hcalIso	&&
-								c->photon.trkSumPtHollowConeDR04[j]  < cut_trackIso	&&
-								c->photon.hadronicOverEm[j]   	     < cut_hadronicOverEm);
-				  if (passed_iso)
-				  {
-					  count_after_iso++;
-					  photon_pt_after_iso->Fill(c->photon.pt[j]);
-
-					  // purity enhancement
-					  passed_purity = c->photon.sigmaIetaIeta[j] < cut_sigmaIetaIeta_lt ;
-					  if (passed_purity)
-					  {
-						  count_after_purity++;
-						  photon_pt_after_purity->Fill(c->photon.pt[j]);
-					  }
-				  }
-			  }
-			  break;	// only leading photon is selected.
 		  }
+		  // spike rejection
+		  if (passed_eta && passed_spike_reject)
+		  {
+			  count_after_spike_reject++;
+			  photon_pt_after_spike_reject->Fill(c->photon.pt[j]);
+		  }
+		  // isolation
+		  if (passed_eta && passed_spike_reject && passed_iso)
+		  {
+			  count_after_iso++;
+			  photon_pt_after_iso->Fill(c->photon.pt[j]);
+		  }
+		  // purity enhancement
+		  if (passed_eta && passed_spike_reject && passed_iso && passed_purity)
+		  {
+			  count_after_purity++;
+			  photon_pt_after_purity->Fill(c->photon.pt[j]);
+		  }
+
+		  if(passed_eta)
+			  break;	// only leading photon is selected.
 	  }
   }
 
