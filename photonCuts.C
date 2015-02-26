@@ -100,7 +100,9 @@ const float cut_hadronicOverEm = 0.1;
 // purity enhancement
 const float cut_sigmaIetaIeta_lt = 0.01;
 
-
+// cuts for jets
+const float cut_jet_pt = 30;
+const float cut_jet_eta = 3;
 
 void photonCuts()
 {
@@ -131,6 +133,10 @@ void photonCuts()
 
 
   TH1D *photon_pt_after_eta = new TH1D("photon_pt_after_eta",";p_{T}",100, 0, 200);
+  TH1D *photon_eta_after_eta = new TH1D("photon_eta_after_eta",";\eta",100, -2, 2);
+  TH1D *photon_phi_after_eta = new TH1D("photon_phi_after_eta",";\phi",100, -TMath::Pi(), TMath::Pi());
+  // HERE
+
   TH1D *photon_pt_after_spike_reject = new TH1D("photon_pt_after_spike_reject",";p_{T}",100, 0, 200);
   TH1D *photon_pt_after_iso = new TH1D("photon_pt_after_iso",";p_{T}",100, 0, 200);
   TH1D *photon_pt_after_purity = new TH1D("photon_pt_after_purity",";p_{T}",100, 0, 200);
@@ -155,6 +161,8 @@ void photonCuts()
 		  {
 			  count_after_eta++;
 			  photon_pt_after_eta->Fill(c->photon.pt[j]);
+			  photon_eta_after_eta->Fill(c->photon.eta[j]);
+			  photon_phi_after_eta->Fill(c->photon.phi[j]);
 
 			  // spike rejection
 			  passed_spike_reject = (c->photon.sigmaIphiIphi[j] 			> cut_sigmaIphiIphi &&
@@ -190,12 +198,14 @@ void photonCuts()
 	  }
   }
 
-  TCanvas *c2 = new TCanvas();
+  TCanvas *c_after_eta_1 = new TCanvas();
   photon_pt_after_eta->Draw();
-  TCanvas *c3 = new TCanvas();
-  photon_pt_after_spike_reject->Draw();
-  TCanvas *c4 = new TCanvas();
-  photon_pt_after_iso->Draw();
+  TCanvas *c_after_eta_2 = new TCanvas();
+  photon_eta_after_eta->Draw();
+  TCanvas *c_after_eta_3 = new TCanvas();
+  photon_phi_after_eta->Draw();
+
+
   TCanvas *c5 = new TCanvas();
   photon_pt_after_purity->Draw();
 
