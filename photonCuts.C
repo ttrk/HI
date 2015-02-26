@@ -106,7 +106,8 @@ const float cut_jet_eta = 3;
 
 void photonCuts()
 {
-  HiForest *c = new HiForest("/mnt/hadoop/cms/store/user/luck/2014-photon-forests/pPb_DATA_photon30trig_localJEC_v1.root", "forest", cPPb, false);
+  const TString inFile_str="/mnt/hadoop/cms/store/user/luck/2014-photon-forests/pPb_DATA_photon30trig_localJEC_v1.root";
+  HiForest *c = new HiForest(inFile_str, "forest", cPPb, false);
 
   c->LoadNoTrees();
   c->hasPhotonTree = true;
@@ -120,6 +121,9 @@ void photonCuts()
   bool passed_spike_reject;
   bool passed_iso;
   bool passed_purity;
+
+  const TString outFile_str="photonCuts_out.root";
+  TFile *outFile = new TFile(outFile_str,"RECREATE");
 
   int count_after_eta=0;			// number of events whose leading photon passes eta cut
   int count_after_spike_reject=0;	// number of events whose leading photon passes spike rejection cut and previous cuts
@@ -135,11 +139,18 @@ void photonCuts()
   TH1D *photon_pt_after_eta = new TH1D("photon_pt_after_eta",";p_{T}",100, 0, 200);
   TH1D *photon_eta_after_eta = new TH1D("photon_eta_after_eta",";\eta",100, -2, 2);
   TH1D *photon_phi_after_eta = new TH1D("photon_phi_after_eta",";\phi",100, -TMath::Pi(), TMath::Pi());
-  // HERE
 
   TH1D *photon_pt_after_spike_reject = new TH1D("photon_pt_after_spike_reject",";p_{T}",100, 0, 200);
+  TH1D *photon_eta_after_spike_reject = new TH1D("photon_eta_after_spike_reject",";\eta",100, -2, 2);
+  TH1D *photon_phi_after_spike_reject = new TH1D("photon_phi_after_spike_reject",";\phi",100, -TMath::Pi(), TMath::Pi());
+
   TH1D *photon_pt_after_iso = new TH1D("photon_pt_after_iso",";p_{T}",100, 0, 200);
+  TH1D *photon_eta_after_iso = new TH1D("photon_eta_after_iso",";\eta",100, -2, 2);
+  TH1D *photon_phi_after_iso = new TH1D("photon_phi_after_iso",";\phi",100, -TMath::Pi(), TMath::Pi());
+
   TH1D *photon_pt_after_purity = new TH1D("photon_pt_after_purity",";p_{T}",100, 0, 200);
+  TH1D *photon_eta_after_purity = new TH1D("photon_eta_after_purity",";\eta",100, -2, 2);
+  TH1D *photon_phi_after_purity = new TH1D("photon_phi_after_purity",";\phi",100, -TMath::Pi(), TMath::Pi());
 
 //  Long64_t entries = c->photonTree->GetEntries();
     Long64_t entries = 10000;	// work with a smaller set to get faster results
@@ -178,18 +189,24 @@ void photonCuts()
 		  {
 			  count_after_spike_reject++;
 			  photon_pt_after_spike_reject->Fill(c->photon.pt[j]);
+			  photon_eta_after_spike_reject->Fill(c->photon.eta[j]);
+			  photon_phi_after_spike_reject->Fill(c->photon.phi[j]);
 		  }
 		  // isolation
 		  if (passed_eta && passed_spike_reject && passed_iso)
 		  {
 			  count_after_iso++;
 			  photon_pt_after_iso->Fill(c->photon.pt[j]);
+			  photon_eta_after_iso->Fill(c->photon.eta[j]);
+			  photon_phi_after_iso->Fill(c->photon.phi[j]);
 		  }
 		  // purity enhancement
 		  if (passed_eta && passed_spike_reject && passed_iso && passed_purity)
 		  {
 			  count_after_purity++;
 			  photon_pt_after_purity->Fill(c->photon.pt[j]);
+			  photon_eta_after_purity->Fill(c->photon.eta[j]);
+			  photon_phi_after_purity->Fill(c->photon.phi[j]);
 		  }
 
 		  if(passed_eta)
@@ -197,19 +214,27 @@ void photonCuts()
 	  }
   }
 
-  TCanvas *c_after_eta_1 = new TCanvas();
-  photon_pt_after_eta->Draw();
-  TCanvas *c_after_eta_2 = new TCanvas();
-  photon_eta_after_eta->Draw();
-  TCanvas *c_after_eta_3 = new TCanvas();
-  photon_phi_after_eta->Draw();
-
-
-  TCanvas *c5 = new TCanvas();
-  photon_pt_after_purity->Draw();
-
   cout << " count after eta cut : "<< count_after_eta << endl;
   cout << " count after spike rejection cut : "<< count_after_spike_reject << endl;
   cout << " count after isolation cut : "<< count_after_iso << endl;
   cout << " count after purity enhancement cut : "<< count_after_purity << endl;
+
+  // save objects to File
+  outFile->cd();
+  photon_pt_after_eta->Write();
+  photon_eta_after_eta->Write();
+  photon_phi_after_eta->Write();
+  photon_pt_after_spike_reject->Write();
+  photon_eta_after_spike_reject->Write();
+  photon_phi_after_spike_reject->Write();
+  photon_pt_after_iso->Write();
+  photon_eta_after_iso->Write();
+  photon_phi_after_iso->Write();
+  photon_pt_after_purity->Write();
+  photon_eta_after_purity->Write();
+  photon_phi_after_purity->Write();
+
+  std::cout << "output written to : " << outFile_str << std::endl;
+
+  outFile->Close();
 }
