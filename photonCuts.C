@@ -145,7 +145,7 @@ void photonCuts()
   TCanvas *c1 = new TCanvas();
   c->photonTree->Draw("pt");
 
-
+  // PHOTON histograms
   TH1D *photon_pt_after_eta = new TH1D("photon_pt_after_eta",";p_{T}",100, 0, 200);
   TH1D *photon_eta_after_eta = new TH1D("photon_eta_after_eta",";\eta",100, -2, 2);
   TH1D *photon_phi_after_eta = new TH1D("photon_phi_after_eta",";\phi",100, -TMath::Pi(), TMath::Pi());
@@ -162,10 +162,39 @@ void photonCuts()
   TH1D *photon_eta_after_purity = new TH1D("photon_eta_after_purity",";\eta",100, -2, 2);
   TH1D *photon_phi_after_purity = new TH1D("photon_phi_after_purity",";\phi",100, -TMath::Pi(), TMath::Pi());
 
+  // JET histograms
+  int jet_count_last_bin=20;
+  Double_t jet_photon_DPHI_firstBin=0;
+  TH1D *jet_pt_after_eta = new TH1D("jet_pt_after_eta",";p_{T}",100, 0, 200);
+  TH1D *jet_eta_after_eta = new TH1D("jet_eta_after_eta",";\eta",100, -2, 2);
+  TH1D *jet_phi_after_eta = new TH1D("jet_phi_after_eta",";\phi",100, -TMath::Pi(), TMath::Pi());
+  TH1D *jet_count_after_eta = new TH1D("jet_count_after_eta","number of selected jets",100, 0,jet_count_last_bin);
+  TH1D *jet_photon_DPHI_after_eta = new TH1D("jet_photon_DPHI_after_eta",";\phi",100, jet_photon_DPHI_firstBin, TMath::Pi());
+
+  TH1D *jet_pt_after_spike_reject = new TH1D("jet_pt_after_spike_reject",";p_{T}",100, 0, 200);
+  TH1D *jet_eta_after_spike_reject = new TH1D("jet_eta_after_spike_reject",";\eta",100, -2, 2);
+  TH1D *jet_phi_after_spike_reject = new TH1D("jet_phi_after_spike_reject",";\phi",100, -TMath::Pi(), TMath::Pi());
+  TH1D *jet_count_after_spike_reject = new TH1D("jet_count_after_spike_reject","number of selected jets",100, 0,jet_count_last_bin);
+  TH1D *jet_photon_DPHI_after_spike_reject = new TH1D("jet_photon_DPHI_after_spike_reject",";\phi",100, jet_photon_DPHI_firstBin, TMath::Pi());
+
+  TH1D *jet_pt_after_iso = new TH1D("jet_pt_after_iso",";p_{T}",100, 0, 200);
+  TH1D *jet_eta_after_iso = new TH1D("jet_eta_after_iso",";\eta",100, -2, 2);
+  TH1D *jet_phi_after_iso = new TH1D("jet_phi_after_iso",";\phi",100, -TMath::Pi(), TMath::Pi());
+  TH1D *jet_count_after_iso = new TH1D("jet_count_after_iso","number of selected jets",100, 0,jet_count_last_bin);
+  TH1D *jet_photon_DPHI_after_iso = new TH1D("jet_photon_DPHI_after_iso",";\phi",100, jet_photon_DPHI_firstBin, TMath::Pi());
+
+  TH1D *jet_pt_after_purity = new TH1D("jet_pt_after_purity",";p_{T}",100, 0, 200);
+  TH1D *jet_eta_after_purity = new TH1D("jet_eta_after_purity",";\eta",100, -2, 2);
+  TH1D *jet_phi_after_purity = new TH1D("jet_phi_after_purity",";\phi",100, -TMath::Pi(), TMath::Pi());
+  TH1D *jet_count_after_purity = new TH1D("jet_count_after_purity","number of selected jets",100, 0,jet_count_last_bin);
+  TH1D *jet_photon_DPHI_after_purity = new TH1D("jet_photon_DPHI_after_purity",";\phi",100, jet_photon_DPHI_firstBin, TMath::Pi());
+
+
 //  Long64_t entries = c->photonTree->GetEntries();
     Long64_t entries = 10000;	// work with a smaller set to get faster results
 
-  int index_leading_jet;
+    int index_leading_photon;
+//  int index_leading_jet;
   for( Long64_t i = 0; i < entries; ++i)
   {
 	  c->GetEntry(i);
@@ -175,6 +204,7 @@ void photonCuts()
 	  passed_iso=false;
 	  passed_purity=false;
 
+	  index_leading_photon=-1;
 	  for( int j = 0; j < c->photon.nPhotons; ++j)
 	  {
 		  passed_eta = TMath::Abs(c->photon.eta[j]) < cut_eta;
@@ -222,63 +252,99 @@ void photonCuts()
 		  }
 
 		  if(passed_eta)
+		  {
+			  index_leading_photon = j;		// leading photon will be used for delta Phi
 			  break;	// only leading photon is selected.
+		  }
 	  }
 
-	  index_leading_jet=-1;
+//	  index_leading_jet=-1;
+	  numJets_after_eta=0;
+	  numJets_after_spike_reject=0;
+	  numJets_after_iso=0;
+	  numJets_after_purity=0;
 	  for( int j = 0; j < c->akPu3PF.nref; ++j)
 	  {
 		  passed_jet_pt = c->akPu3PF.jtpt[j] 				> cut_jet_pt;
-		  passed_jet_eta = TMath::Abs(c->akPu3PF.jtpt[j])	< cut_jet_eta;
+		  passed_jet_eta = TMath::Abs(c->akPu3PF.jteta[j])	< cut_jet_eta;
 
 		  if(passed_jet_pt && passed_jet_eta)
 		  {
+/*
 			  if(index_leading_jet==-1)
 				  index_leading_jet = j;	// first jet that passes the jet cut is the leading jet of the event.
-			  ///////////HERE 1
+			  	  	  	  	  	  	  	  	// forget about leading jet for now.
+*/
 
 			  // eta cut
 			  if(passed_eta)
 			  {
-				  count_after_eta++;
-				  photon_pt_after_eta->Fill(c->photon.pt[j]);
-				  photon_eta_after_eta->Fill(c->photon.eta[j]);
-				  photon_phi_after_eta->Fill(c->photon.phi[j]);
+				  numJets_after_eta++;
+				  jet_pt_after_eta->Fill(c->akPu3PF.jtpt[j]);
+				  jet_eta_after_eta->Fill(c->akPu3PF.jteta[j]);
+				  jet_phi_after_eta->Fill(c->akPu3PF.jtphi[j]);
+				  jet_photon_DPHI_after_eta->Fill(TMath::Abs(getDPHI(c->akPu3PF.jtphi[j],c->photon.phi[index_leading_photon])));
 			  }
 			  // spike rejection
 			  if (passed_eta && passed_spike_reject)
 			  {
-				  count_after_spike_reject++;
-				  photon_pt_after_spike_reject->Fill(c->photon.pt[j]);
-				  photon_eta_after_spike_reject->Fill(c->photon.eta[j]);
-				  photon_phi_after_spike_reject->Fill(c->photon.phi[j]);
+				  numJets_after_spike_reject++;
+				  jet_pt_after_spike_reject->Fill(c->akPu3PF.jtpt[j]);
+				  jet_eta_after_spike_reject->Fill(c->akPu3PF.jteta[j]);
+				  jet_phi_after_spike_reject->Fill(c->akPu3PF.jtphi[j]);
+				  jet_photon_DPHI_after_spike_reject->Fill(TMath::Abs(getDPHI(c->akPu3PF.jtphi[j],c->photon.phi[index_leading_photon])));
 			  }
 			  // isolation
 			  if (passed_eta && passed_spike_reject && passed_iso)
 			  {
-				  count_after_iso++;
-				  photon_pt_after_iso->Fill(c->photon.pt[j]);
-				  photon_eta_after_iso->Fill(c->photon.eta[j]);
-				  photon_phi_after_iso->Fill(c->photon.phi[j]);
+				  numJets_after_iso++;
+				  jet_pt_after_iso->Fill(c->akPu3PF.jtpt[j]);
+				  jet_eta_after_iso->Fill(c->akPu3PF.jteta[j]);
+				  jet_phi_after_iso->Fill(c->akPu3PF.jtphi[j]);
+				  jet_photon_DPHI_after_iso->Fill(TMath::Abs(getDPHI(c->akPu3PF.jtphi[j],c->photon.phi[index_leading_photon])));
 			  }
 			  // purity enhancement
 			  if (passed_eta && passed_spike_reject && passed_iso && passed_purity)
 			  {
-				  count_after_purity++;
-				  photon_pt_after_purity->Fill(c->photon.pt[j]);
-				  photon_eta_after_purity->Fill(c->photon.eta[j]);
-				  photon_phi_after_purity->Fill(c->photon.phi[j]);
+				  numJets_after_purity++;
+				  jet_pt_after_purity->Fill(c->akPu3PF.jtpt[j]);
+				  jet_eta_after_purity->Fill(c->akPu3PF.jteta[j]);
+				  jet_phi_after_purity->Fill(c->akPu3PF.jtphi[j]);
+				  jet_photon_DPHI_after_purity->Fill(TMath::Abs(getDPHI(c->akPu3PF.jtphi[j],c->photon.phi[index_leading_photon])));
 			  }
 		  }
 	  }
+
+	  // number of selected jets in an event after the relevant cuts on photons
+	  // eta cut
+	  if(passed_eta)
+	  {
+		  jet_count_after_eta->Fill(numJets_after_eta);
+	  }
+	  // spike rejection
+	  if (passed_eta && passed_spike_reject)
+	  {
+		  jet_count_after_spike_reject->Fill(numJets_after_spike_reject);
+	  }
+	  // isolation
+	  if (passed_eta && passed_spike_reject && passed_iso)
+	  {
+		  jet_count_after_iso->Fill(numJets_after_iso);
+	  }
+	  // purity enhancement
+	  if (passed_eta && passed_spike_reject && passed_iso && passed_purity)
+	  {
+		  jet_count_after_purity->Fill(numJets_after_purity);
+	  }
   }
 
-  cout << " count after eta cut : "<< count_after_eta << endl;
-  cout << " count after spike rejection cut : "<< count_after_spike_reject << endl;
-  cout << " count after isolation cut : "<< count_after_iso << endl;
-  cout << " count after purity enhancement cut : "<< count_after_purity << endl;
+  cout << " event count after eta cut : "<< count_after_eta << endl;
+  cout << " event count after spike rejection cut : "<< count_after_spike_reject << endl;
+  cout << " event count after isolation cut : "<< count_after_iso << endl;
+  cout << " event count after purity enhancement cut : "<< count_after_purity << endl;
 
   // save objects to File
+  // PHOTON histograms
   photon_pt_after_eta->Write();
   photon_eta_after_eta->Write();
   photon_phi_after_eta->Write();
@@ -290,8 +356,31 @@ void photonCuts()
   photon_phi_after_iso->Write();
   photon_pt_after_purity->Write();
   photon_eta_after_purity->Write();
-  photon_phi_after_purity->Write();
 
+  // SELECTED JET histograms
+  jet_pt_after_eta->Write();
+  jet_eta_after_eta->Write();
+  jet_phi_after_eta->Write();
+  jet_count_after_eta->Write();
+  jet_photon_DPHI_after_eta->Write();
+
+  jet_pt_after_spike_reject->Write();
+  jet_eta_after_spike_reject->Write();
+  jet_phi_after_spike_reject->Write();
+  jet_count_after_spike_reject->Write();
+  jet_photon_DPHI_after_spike_reject->Write();
+
+  jet_pt_after_iso->Write();
+  jet_eta_after_iso->Write();
+  jet_phi_after_iso->Write();
+  jet_count_after_iso->Write();
+  jet_photon_DPHI_after_iso->Write();
+
+  jet_pt_after_purity->Write();
+  jet_eta_after_purity->Write();
+  jet_phi_after_purity->Write();
+  jet_count_after_purity->Write();
+  jet_photon_DPHI_after_purity->Write();
 
   std::cout << "output written to : " << outFile_str << std::endl;
 
