@@ -122,13 +122,23 @@ void photonCuts()
   bool passed_iso;
   bool passed_purity;
 
+  bool passed_jet_pt;
+  bool passed_jet_eta;
+
   const TString outFile_str="photonCuts_out.root";
   TFile *outFile = new TFile(outFile_str,"RECREATE");
 
-  int count_after_eta=0;			// number of events whose leading photon passes eta cut
-  int count_after_spike_reject=0;	// number of events whose leading photon passes spike rejection cut and previous cuts
-  int count_after_iso=0;			// number of events whose leading photon passes isolation cut and previous cuts
-  int count_after_purity=0;			// number of events whose leading photon passes purity enhancement cut and previous cuts
+  int count_after_eta=0;			// number of events which pass the eta cut, ie. events where there is a photon that passes eta cut
+  int count_after_spike_reject=0;	// number of events whose leading photon after the eta cut passes spike rejection cut
+  int count_after_iso=0;			// number of events whose leading photon after the eta cut passes isolation cut and previous cuts
+  int count_after_purity=0;			// number of events whose leading photon after the eta cut passes purity enhancement cut and previous cuts
+
+  	  	  	  	  	  	  	  	  	// selected jet : a jet that passes jet_pt and jet_eta cut
+  int numJets_after_eta=0;			// number of selected jets in an event which passes the eta cut
+  int numJets_after_spike_reject=0;	// number of selected jets in an event which passes the spike rejection cut and all previous cuts
+  int numJets_after_iso=0;			// number of selected jets in an event which passes the isolation cut and all previous cuts
+  int numJets_after_purity=0;		// number of selected jets in an event which passes the purity enhancement cut and all previous cuts
+  ///////////HERE 2
 
   std::cout << "number of entries: " << c->GetEntries() << std::endl;
 
@@ -154,17 +164,19 @@ void photonCuts()
 
 //  Long64_t entries = c->photonTree->GetEntries();
     Long64_t entries = 10000;	// work with a smaller set to get faster results
+
+  int index_leading_jet;
   for( Long64_t i = 0; i < entries; ++i)
   {
 	  c->GetEntry(i);
 
+	  passed_eta=false;
+	  passed_spike_reject=false;
+	  passed_iso=false;
+	  passed_purity=false;
+
 	  for( int j = 0; j < c->photon.nPhotons; ++j)
 	  {
-		  passed_eta=false;
-		  passed_spike_reject=false;
-		  passed_iso=false;
-		  passed_purity=false;
-
 		  passed_eta = TMath::Abs(c->photon.eta[j]) < cut_eta;
 		  passed_spike_reject = (c->photon.sigmaIphiIphi[j] 			> cut_sigmaIphiIphi &&
 				  	  	  	  	 c->photon.sigmaIetaIeta[j] 			> cut_sigmaIetaIeta_gt &&
@@ -212,6 +224,53 @@ void photonCuts()
 		  if(passed_eta)
 			  break;	// only leading photon is selected.
 	  }
+
+	  index_leading_jet=-1;
+	  for( int j = 0; j < c->akPu3PF.nref; ++j)
+	  {
+		  passed_jet_pt = c->akPu3PF.jtpt[j] 				> cut_jet_pt;
+		  passed_jet_eta = TMath::Abs(c->akPu3PF.jtpt[j])	< cut_jet_eta;
+
+		  if(passed_jet_pt && passed_jet_eta)
+		  {
+			  if(index_leading_jet==-1)
+				  index_leading_jet = j;	// first jet that passes the jet cut is the leading jet of the event.
+			  ///////////HERE 1
+
+			  // eta cut
+			  if(passed_eta)
+			  {
+				  count_after_eta++;
+				  photon_pt_after_eta->Fill(c->photon.pt[j]);
+				  photon_eta_after_eta->Fill(c->photon.eta[j]);
+				  photon_phi_after_eta->Fill(c->photon.phi[j]);
+			  }
+			  // spike rejection
+			  if (passed_eta && passed_spike_reject)
+			  {
+				  count_after_spike_reject++;
+				  photon_pt_after_spike_reject->Fill(c->photon.pt[j]);
+				  photon_eta_after_spike_reject->Fill(c->photon.eta[j]);
+				  photon_phi_after_spike_reject->Fill(c->photon.phi[j]);
+			  }
+			  // isolation
+			  if (passed_eta && passed_spike_reject && passed_iso)
+			  {
+				  count_after_iso++;
+				  photon_pt_after_iso->Fill(c->photon.pt[j]);
+				  photon_eta_after_iso->Fill(c->photon.eta[j]);
+				  photon_phi_after_iso->Fill(c->photon.phi[j]);
+			  }
+			  // purity enhancement
+			  if (passed_eta && passed_spike_reject && passed_iso && passed_purity)
+			  {
+				  count_after_purity++;
+				  photon_pt_after_purity->Fill(c->photon.pt[j]);
+				  photon_eta_after_purity->Fill(c->photon.eta[j]);
+				  photon_phi_after_purity->Fill(c->photon.phi[j]);
+			  }
+		  }
+	  }
   }
 
   cout << " count after eta cut : "<< count_after_eta << endl;
@@ -220,7 +279,6 @@ void photonCuts()
   cout << " count after purity enhancement cut : "<< count_after_purity << endl;
 
   // save objects to File
-  outFile->cd();
   photon_pt_after_eta->Write();
   photon_eta_after_eta->Write();
   photon_phi_after_eta->Write();
@@ -234,7 +292,20 @@ void photonCuts()
   photon_eta_after_purity->Write();
   photon_phi_after_purity->Write();
 
+
   std::cout << "output written to : " << outFile_str << std::endl;
 
   outFile->Close();
+}
+
+Double_t getDPHI(Double_t phi1, Double_t phi2) {
+    Double_t dphi = phi1 - phi2;
+    if (dphi > 3.141592653589)
+        dphi = dphi - 2. * 3.141592653589;
+    if (dphi <= -3.141592653589)
+        dphi = dphi + 2. * 3.141592653589;
+    if (TMath::Abs(dphi) > 3.141592653589) {
+        cout << " commonUtility::getDPHI error!!! dphi is bigger than 3.141592653589 " << endl;
+    }
+    return dphi;
 }
