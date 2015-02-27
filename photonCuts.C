@@ -19,6 +19,25 @@ using  std::endl;
 //
 
 /*
+ * 27.02.2015
+	1) Event Selection
+	- hbheNoiseFilter
+	- pACollisionEventSelectionPA
+	- |vz|<15
+
+	2) jet selection
+	- only jets with deltaR > 0.4 from photon
+
+	3) additional jet selection
+	 	 deltaPhi > 7/8 * pi
+
+	4) pretty histograms
+		- x-axis labels
+		- box with cuts
+		- possibly put multiple distributions in 1 plot, use colors
+*/
+
+/*
  * 02/23/2015
 Hey guys,
 
@@ -85,6 +104,7 @@ Alex
  *			TCut  cut_eta = Form("abs(%s)<(%f)", br_photon_eta, lt_eta);
  * 2.
  * */
+const float cut_vz = 15;
 
 const float cut_eta = 1.44;
 // spike rejection
@@ -103,6 +123,8 @@ const float cut_sigmaIetaIeta_lt = 0.01;
 // cuts for jets
 const float cut_jet_pt = 30;
 const float cut_jet_eta = 3;
+const float cut_jet_photon_deltaR = 0.4;
+const float cut_jet_photon_deltaPhi =  7/8 * TMath::Pi();
 
 void photonCuts()
 {
@@ -117,6 +139,8 @@ void photonCuts()
 
   c->InitTree();
 
+  bool passed_event_selection;
+
   bool passed_eta;
   bool passed_spike_reject;
   bool passed_iso;
@@ -124,6 +148,8 @@ void photonCuts()
 
   bool passed_jet_pt;
   bool passed_jet_eta;
+  bool passed_jet_photon_deltaR;
+  bool passed_jet_photon_deltaPhi;	//  this is not a cut, but an additional selection
 
   const TString outFile_str="photonCuts_out.root";
   TFile *outFile = new TFile(outFile_str,"RECREATE");
@@ -138,7 +164,6 @@ void photonCuts()
   int numJets_after_spike_reject=0;	// number of selected jets in an event which passes the spike rejection cut and all previous cuts
   int numJets_after_iso=0;			// number of selected jets in an event which passes the isolation cut and all previous cuts
   int numJets_after_purity=0;		// number of selected jets in an event which passes the purity enhancement cut and all previous cuts
-  ///////////HERE 2
 
   std::cout << "number of entries: " << c->GetEntries() << std::endl;
 
@@ -189,15 +214,47 @@ void photonCuts()
   TH1D *jet_count_after_purity = new TH1D("jet_count_after_purity","number of selected jets",100, 0,jet_count_last_bin);
   TH1D *jet_photon_DPHI_after_purity = new TH1D("jet_photon_DPHI_after_purity",";\phi",100, jet_photon_DPHI_firstBin, TMath::Pi());
 
+// JET histograms with deltaPhi > 7/8 * pi
+  TH1D *jet_pt_after_eta_dPhiCut = new TH1D("jet_pt_after_eta_dPhiCut",";p_{T}",100, 0, 200);
+  TH1D *jet_eta_after_eta_dPhiCut = new TH1D("jet_eta_after_eta_dPhiCut",";\eta",100, -2, 2);
+  TH1D *jet_phi_after_eta_dPhiCut = new TH1D("jet_phi_after_eta_dPhiCut",";\phi",100, -TMath::Pi(), TMath::Pi());
+  TH1D *jet_count_after_eta_dPhiCut = new TH1D("jet_count_after_eta_dPhiCut","number of selected jets",100, 0,jet_count_last_bin);
+  TH1D *jet_photon_DPHI_after_eta_dPhiCut = new TH1D("jet_photon_DPHI_after_eta_dPhiCut",";\phi",100, jet_photon_DPHI_firstBin, TMath::Pi());
+
+  TH1D *jet_pt_after_spike_reject_dPhiCut = new TH1D("jet_pt_after_spike_reject_dPhiCut",";p_{T}",100, 0, 200);
+  TH1D *jet_eta_after_spike_reject_dPhiCut = new TH1D("jet_eta_after_spike_reject_dPhiCut",";\eta",100, -2, 2);
+  TH1D *jet_phi_after_spike_reject_dPhiCut = new TH1D("jet_phi_after_spike_reject_dPhiCut",";\phi",100, -TMath::Pi(), TMath::Pi());
+  TH1D *jet_count_after_spike_reject_dPhiCut = new TH1D("jet_count_after_spike_reject_dPhiCut","number of selected jets",100, 0,jet_count_last_bin);
+  TH1D *jet_photon_DPHI_after_spike_reject_dPhiCut = new TH1D("jet_photon_DPHI_after_spike_reject_dPhiCut",";\phi",100, jet_photon_DPHI_firstBin, TMath::Pi());
+
+  TH1D *jet_pt_after_iso_dPhiCut = new TH1D("jet_pt_after_iso_dPhiCut",";p_{T}",100, 0, 200);
+  TH1D *jet_eta_after_iso_dPhiCut = new TH1D("jet_eta_after_iso_dPhiCut",";\eta",100, -2, 2);
+  TH1D *jet_phi_after_iso_dPhiCut = new TH1D("jet_phi_after_iso_dPhiCut",";\phi",100, -TMath::Pi(), TMath::Pi());
+  TH1D *jet_count_after_iso_dPhiCut = new TH1D("jet_count_after_iso_dPhiCut","number of selected jets",100, 0,jet_count_last_bin);
+  TH1D *jet_photon_DPHI_after_iso_dPhiCut = new TH1D("jet_photon_DPHI_after_iso_dPhiCut",";\phi",100, jet_photon_DPHI_firstBin, TMath::Pi());
+
+  TH1D *jet_pt_after_purity_dPhiCut = new TH1D("jet_pt_after_purity_dPhiCut",";p_{T}",100, 0, 200);
+  TH1D *jet_eta_after_purity_dPhiCut = new TH1D("jet_eta_after_purity_dPhiCut",";\eta",100, -2, 2);
+  TH1D *jet_phi_after_purity_dPhiCut = new TH1D("jet_phi_after_purity_dPhiCut",";\phi",100, -TMath::Pi(), TMath::Pi());
+  TH1D *jet_count_after_purity_dPhiCut = new TH1D("jet_count_after_purity_dPhiCut","number of selected jets",100, 0,jet_count_last_bin);
+  TH1D *jet_photon_DPHI_after_purity_dPhiCut = new TH1D("jet_photon_DPHI_after_purity_dPhiCut",";\phi",100, jet_photon_DPHI_firstBin, TMath::Pi());
+
 
 //  Long64_t entries = c->photonTree->GetEntries();
     Long64_t entries = 10000;	// work with a smaller set to get faster results
 
     int index_leading_photon;
+    float jet_photon_deltaR;
+    float jet_photon_deltaPhi;
 //  int index_leading_jet;
   for( Long64_t i = 0; i < entries; ++i)
   {
 	  c->GetEntry(i);
+
+	  passed_event_selection = c->skim.pHBHENoiseFilter 			   > 0 	&&
+			  	  	  	  	   c->skim.pPAcollisionEventSelectionPA    > 0  &&
+							   TMath::Abs(c->evt.vz)				   < cut_vz;
+//      if(!passed_event_selection) continue;		// this event failed to pass. Skip to the next of iteration. Go to next event.
 
 	  passed_eta=false;
 	  passed_spike_reject=false;
@@ -207,6 +264,7 @@ void photonCuts()
 	  index_leading_photon=-1;
 	  for( int j = 0; j < c->photon.nPhotons; ++j)
 	  {
+
 		  passed_eta = TMath::Abs(c->photon.eta[j]) < cut_eta;
 		  passed_spike_reject = (c->photon.sigmaIphiIphi[j] 			> cut_sigmaIphiIphi &&
 				  	  	  	  	 c->photon.sigmaIetaIeta[j] 			> cut_sigmaIetaIeta_gt &&
@@ -265,10 +323,19 @@ void photonCuts()
 	  numJets_after_purity=0;
 	  for( int j = 0; j < c->akPu3PF.nref; ++j)
 	  {
-		  passed_jet_pt = c->akPu3PF.jtpt[j] 				> cut_jet_pt;
-		  passed_jet_eta = TMath::Abs(c->akPu3PF.jteta[j])	< cut_jet_eta;
+		  if (index_leading_photon < 0) continue;
 
-		  if(passed_jet_pt && passed_jet_eta)
+		  jet_photon_deltaR   =   getDR(c->akPu3PF.jtphi[j],c->photon.phi[index_leading_photon],
+				  	  	  	            c->akPu3PF.jteta[j],c->photon.eta[index_leading_photon]);
+		  jet_photon_deltaPhi = getDPHI(c->akPu3PF.jtphi[j],c->photon.phi[index_leading_photon]);
+
+		  passed_jet_photon_deltaR     = jet_photon_deltaR			  > cut_jet_photon_deltaR;
+		  passed_jet_pt			   = c->akPu3PF.jtpt[j]			      > cut_jet_pt;
+		  passed_jet_eta 		   = TMath::Abs(c->akPu3PF.jteta[j])  < cut_jet_eta;
+
+		  passed_jet_photon_deltaPhi = TMath::Abs(jet_photon_deltaPhi) > cut_jet_photon_deltaPhi;
+
+		  if(passed_jet_photon_deltaR && passed_jet_pt && passed_jet_eta)
 		  {
 /*
 			  if(index_leading_jet==-1)
@@ -283,7 +350,12 @@ void photonCuts()
 				  jet_pt_after_eta->Fill(c->akPu3PF.jtpt[j]);
 				  jet_eta_after_eta->Fill(c->akPu3PF.jteta[j]);
 				  jet_phi_after_eta->Fill(c->akPu3PF.jtphi[j]);
-				  jet_photon_DPHI_after_eta->Fill(TMath::Abs(getDPHI(c->akPu3PF.jtphi[j],c->photon.phi[index_leading_photon])));
+				  jet_photon_DPHI_after_eta->Fill(TMath::Abs(jet_photon_deltaPhi));
+
+				  if(passed_jet_photon_deltaPhi)
+				  {
+					  //////   HERE
+				  }
 			  }
 			  // spike rejection
 			  if (passed_eta && passed_spike_reject)
@@ -292,7 +364,7 @@ void photonCuts()
 				  jet_pt_after_spike_reject->Fill(c->akPu3PF.jtpt[j]);
 				  jet_eta_after_spike_reject->Fill(c->akPu3PF.jteta[j]);
 				  jet_phi_after_spike_reject->Fill(c->akPu3PF.jtphi[j]);
-				  jet_photon_DPHI_after_spike_reject->Fill(TMath::Abs(getDPHI(c->akPu3PF.jtphi[j],c->photon.phi[index_leading_photon])));
+				  jet_photon_DPHI_after_spike_reject->Fill(TMath::Abs(jet_photon_deltaPhi));
 			  }
 			  // isolation
 			  if (passed_eta && passed_spike_reject && passed_iso)
@@ -301,7 +373,7 @@ void photonCuts()
 				  jet_pt_after_iso->Fill(c->akPu3PF.jtpt[j]);
 				  jet_eta_after_iso->Fill(c->akPu3PF.jteta[j]);
 				  jet_phi_after_iso->Fill(c->akPu3PF.jtphi[j]);
-				  jet_photon_DPHI_after_iso->Fill(TMath::Abs(getDPHI(c->akPu3PF.jtphi[j],c->photon.phi[index_leading_photon])));
+				  jet_photon_DPHI_after_iso->Fill(TMath::Abs(jet_photon_deltaPhi));
 			  }
 			  // purity enhancement
 			  if (passed_eta && passed_spike_reject && passed_iso && passed_purity)
@@ -310,7 +382,7 @@ void photonCuts()
 				  jet_pt_after_purity->Fill(c->akPu3PF.jtpt[j]);
 				  jet_eta_after_purity->Fill(c->akPu3PF.jteta[j]);
 				  jet_phi_after_purity->Fill(c->akPu3PF.jtphi[j]);
-				  jet_photon_DPHI_after_purity->Fill(TMath::Abs(getDPHI(c->akPu3PF.jtphi[j],c->photon.phi[index_leading_photon])));
+				  jet_photon_DPHI_after_purity->Fill(TMath::Abs(jet_photon_deltaPhi));
 			  }
 		  }
 	  }
@@ -345,6 +417,9 @@ void photonCuts()
 
   // save objects to File
   // PHOTON histograms
+  const char *photon_dir="photons";
+  outFile->mkdir(photon_dir);
+  outFile->cd(photon_dir);
   photon_pt_after_eta->Write();
   photon_eta_after_eta->Write();
   photon_phi_after_eta->Write();
@@ -358,6 +433,9 @@ void photonCuts()
   photon_eta_after_purity->Write();
 
   // SELECTED JET histograms
+  const char *jet_dir="jets";
+  outFile->mkdir(jet_dir);
+  outFile->cd(jet_dir);
   jet_pt_after_eta->Write();
   jet_eta_after_eta->Write();
   jet_phi_after_eta->Write();
@@ -384,6 +462,7 @@ void photonCuts()
 
   std::cout << "output written to : " << outFile_str << std::endl;
 
+  c->inf->Close();
   outFile->Close();
 }
 
@@ -397,4 +476,14 @@ Double_t getDPHI(Double_t phi1, Double_t phi2) {
         cout << " commonUtility::getDPHI error!!! dphi is bigger than 3.141592653589 " << endl;
     }
     return dphi;
+}
+
+Double_t getDETA(Double_t eta1, Double_t eta2){
+	return eta1 - eta2;
+}
+
+Double_t getDR(Double_t phi1, Double_t phi2, Double_t eta1, Double_t eta2){
+	Double_t dphi = getDPHI(phi1,phi2);
+	Double_t deta = getDETA(eta1,eta2);
+	return TMath::Sqrt( deta*deta+dphi*dphi );
 }
