@@ -165,6 +165,14 @@ void photonCuts()
   int numJets_after_iso=0;			// number of selected jets in an event which passes the isolation cut and all previous cuts
   int numJets_after_purity=0;		// number of selected jets in an event which passes the purity enhancement cut and all previous cuts
 
+  	  	  	  	  	  	  	  	  	// the above definition for selected jet &&
+              	  	  	  	  	  	// the jet has a delta_Phi > (7/8 * pi) with
+              	  	  	  	  	  	// the leading photon
+  int numJets_after_eta_dPhiCut=0;
+  int numJets_after_spike_reject_dPhiCut=0;
+  int numJets_after_iso_dPhiCut=0;
+  int numJets_after_purity_dPhiCut=0;
+
   std::cout << "number of entries: " << c->GetEntries() << std::endl;
 
   TCanvas *c1 = new TCanvas();
@@ -316,6 +324,8 @@ void photonCuts()
 		  }
 	  }
 
+	  if (index_leading_photon < 0) continue;
+
 //	  index_leading_jet=-1;
 	  numJets_after_eta=0;
 	  numJets_after_spike_reject=0;
@@ -323,17 +333,15 @@ void photonCuts()
 	  numJets_after_purity=0;
 	  for( int j = 0; j < c->akPu3PF.nref; ++j)
 	  {
-		  if (index_leading_photon < 0) continue;
-
 		  jet_photon_deltaR   =   getDR(c->akPu3PF.jtphi[j],c->photon.phi[index_leading_photon],
 				  	  	  	            c->akPu3PF.jteta[j],c->photon.eta[index_leading_photon]);
 		  jet_photon_deltaPhi = getDPHI(c->akPu3PF.jtphi[j],c->photon.phi[index_leading_photon]);
 
-		  passed_jet_photon_deltaR     = jet_photon_deltaR			  > cut_jet_photon_deltaR;
+		  passed_jet_photon_deltaPhi = TMath::Abs(jet_photon_deltaPhi) > cut_jet_photon_deltaPhi;
+
+		  passed_jet_photon_deltaR = jet_photon_deltaR	   			  > cut_jet_photon_deltaR;
 		  passed_jet_pt			   = c->akPu3PF.jtpt[j]			      > cut_jet_pt;
 		  passed_jet_eta 		   = TMath::Abs(c->akPu3PF.jteta[j])  < cut_jet_eta;
-
-		  passed_jet_photon_deltaPhi = TMath::Abs(jet_photon_deltaPhi) > cut_jet_photon_deltaPhi;
 
 		  if(passed_jet_photon_deltaR && passed_jet_pt && passed_jet_eta)
 		  {
@@ -354,7 +362,11 @@ void photonCuts()
 
 				  if(passed_jet_photon_deltaPhi)
 				  {
-					  //////   HERE
+					  numJets_after_eta_dPhiCut++;
+					  jet_pt_after_eta_dPhiCut->Fill(c->akPu3PF.jtpt[j]);
+					  jet_eta_after_eta_dPhiCut->Fill(c->akPu3PF.jteta[j]);
+					  jet_phi_after_eta_dPhiCut->Fill(c->akPu3PF.jtphi[j]);
+					  jet_photon_DPHI_after_eta_dPhiCut->Fill(TMath::Abs(jet_photon_deltaPhi));
 				  }
 			  }
 			  // spike rejection
@@ -365,6 +377,15 @@ void photonCuts()
 				  jet_eta_after_spike_reject->Fill(c->akPu3PF.jteta[j]);
 				  jet_phi_after_spike_reject->Fill(c->akPu3PF.jtphi[j]);
 				  jet_photon_DPHI_after_spike_reject->Fill(TMath::Abs(jet_photon_deltaPhi));
+
+				  if(passed_jet_photon_deltaPhi)
+				  {
+					  numJets_after_spike_reject_dPhiCut++;
+					  jet_pt_after_spike_reject_dPhiCut->Fill(c->akPu3PF.jtpt[j]);
+					  jet_eta_after_spike_reject_dPhiCut->Fill(c->akPu3PF.jteta[j]);
+					  jet_phi_after_spike_reject_dPhiCut->Fill(c->akPu3PF.jtphi[j]);
+					  jet_photon_DPHI_after_spike_reject_dPhiCut->Fill(TMath::Abs(jet_photon_deltaPhi));
+				  }
 			  }
 			  // isolation
 			  if (passed_eta && passed_spike_reject && passed_iso)
@@ -374,6 +395,15 @@ void photonCuts()
 				  jet_eta_after_iso->Fill(c->akPu3PF.jteta[j]);
 				  jet_phi_after_iso->Fill(c->akPu3PF.jtphi[j]);
 				  jet_photon_DPHI_after_iso->Fill(TMath::Abs(jet_photon_deltaPhi));
+
+				  if(passed_jet_photon_deltaPhi)
+				  {
+					  numJets_after_iso_dPhiCut++;
+					  jet_pt_after_iso_dPhiCut->Fill(c->akPu3PF.jtpt[j]);
+					  jet_eta_after_iso_dPhiCut->Fill(c->akPu3PF.jteta[j]);
+					  jet_phi_after_iso_dPhiCut->Fill(c->akPu3PF.jtphi[j]);
+					  jet_photon_DPHI_after_iso_dPhiCut->Fill(TMath::Abs(jet_photon_deltaPhi));
+				  }
 			  }
 			  // purity enhancement
 			  if (passed_eta && passed_spike_reject && passed_iso && passed_purity)
@@ -383,6 +413,15 @@ void photonCuts()
 				  jet_eta_after_purity->Fill(c->akPu3PF.jteta[j]);
 				  jet_phi_after_purity->Fill(c->akPu3PF.jtphi[j]);
 				  jet_photon_DPHI_after_purity->Fill(TMath::Abs(jet_photon_deltaPhi));
+
+				  if(passed_jet_photon_deltaPhi)
+				  {
+					  numJets_after_purity_dPhiCut++;
+					  jet_pt_after_purity_dPhiCut->Fill(c->akPu3PF.jtpt[j]);
+					  jet_eta_after_purity_dPhiCut->Fill(c->akPu3PF.jteta[j]);
+					  jet_phi_after_purity_dPhiCut->Fill(c->akPu3PF.jtphi[j]);
+					  jet_photon_DPHI_after_purity_dPhiCut->Fill(TMath::Abs(jet_photon_deltaPhi));
+				  }
 			  }
 		  }
 	  }
