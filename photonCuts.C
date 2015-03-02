@@ -124,7 +124,7 @@ const float cut_sigmaIetaIeta_lt = 0.01;
 const float cut_jet_pt = 30;
 const float cut_jet_eta = 3;
 const float cut_jet_photon_deltaR = 0.4;
-const float cut_jet_photon_deltaPhi =  7/8 * TMath::Pi();
+const float cut_jet_photon_deltaPhi = (7 * TMath::Pi()) / 8 ;	// 7/8 * TMath::Pi() --> evaluates to 0;
 
 void photonCuts()
 {
@@ -331,6 +331,12 @@ void photonCuts()
 	  numJets_after_spike_reject=0;
 	  numJets_after_iso=0;
 	  numJets_after_purity=0;
+
+	  numJets_after_eta_dPhiCut=0;
+	  numJets_after_spike_reject_dPhiCut=0;
+	  numJets_after_iso_dPhiCut=0;
+	  numJets_after_purity_dPhiCut=0;
+
 	  for( int j = 0; j < c->akPu3PF.nref; ++j)
 	  {
 		  jet_photon_deltaR   =   getDR(c->akPu3PF.jtphi[j],c->photon.phi[index_leading_photon],
