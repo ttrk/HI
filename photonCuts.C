@@ -5,6 +5,7 @@
 #include <TH1D.h>
 #include <TString.h>
 #include <TCut.h>
+#include <TKey.h>
 
 #include <iostream>
 #include <map>
@@ -248,7 +249,8 @@ void photonCuts()
   TH1D *jet_count_after_purity_dPhiCut = new TH1D("jet_count_after_purity_dPhiCut","number of selected jets with #Delta#phi_{J,#gamma}>#frac{7}{8}#pi after purity enhancement cut",100, 0,jet_count_last_bin);
   TH1D *jet_photon_DPHI_after_purity_dPhiCut = new TH1D("jet_photon_DPHI_after_purity_dPhiCut","#Delta#phi_{J,#gamma} with #Delta#phi_{J,#gamma}>#frac{7}{8}#pi after purity enhancement cut;\phi",100, jet_photon_DPHI_dPhiCut_firstBin, TMath::Pi());
 
-
+  TKey *key;
+  key->
 
 //  Long64_t entries = c->photonTree->GetEntries();
     Long64_t entries = 10000;	// work with a smaller set to get faster results
