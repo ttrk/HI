@@ -11,8 +11,6 @@ void test()
 {
 
   TFile *f = new TFile("~/Desktop/photonCuts_out.root","READ");
-//  subIter(next);
-
 
 /*  TList *myKeys=getListOfALLKeys(f);
 //    TList *myKeys=getListOfALLKeys(f,"TH1D");
