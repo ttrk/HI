@@ -38,6 +38,7 @@ git add .
 # better do not execute this command from this script, do it on shell. Because this command requires additional input such as username and password.
 # replace the last commit
 git commit --amend  # this one opens the commit message editor with last commit message
+# NOTE : if you want to use "git commit --amend", do that before you push your changes to the remote repository. Otherwise there will be a conflict with the remote and git will ask you to "pull" the remote repo and then let you do "git commit --amend".
 
 # push changes to remote repo.
 git push -u origin master   # push what my "master" branch here to the remote repo. that I called "origin"

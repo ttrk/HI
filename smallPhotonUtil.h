@@ -18,7 +18,7 @@ void mergeCuts(TCut cut, TCut* cuts);
 void mergeCuts(TCut cut, TCut* cuts, int len);
 TList* getListOfALLKeys(TDirectoryFile* dir);
 TList* getListOfALLKeys(TDirectoryFile* dir, const char* type);
-void saveAllHistogramsToPicture(TDirectoryFile* dir, const char* fileType="gif");
+//void saveAllHistogramsToPicture(TDirectoryFile* dir, const char* fileType="gif");		// this line gives error if I use default value option (here const char* fileType="gif") in the function definition.
 
 /*
  * merge a set of cuts into a single one. the resulting cut is the cut that satisfies all individual cuts
