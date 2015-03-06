@@ -20,6 +20,13 @@ using  std::endl;
 //
 
 /*
+ * 02.03.22015 : Alex's message
+ * just so I don't forget, these were the things mentioned:
+		1) use different photon pT cuts and then look at the jet pT distributions
+		2) change the binning on the ratio plots to see if we have a trend in jet pt in the ratio
+ *
+ * */
+/*
  * 27.02.2015
 	1) Event Selection
 	- hbheNoiseFilter
@@ -105,6 +112,8 @@ Alex
  *			TCut  cut_eta = Form("abs(%s)<(%f)", br_photon_eta, lt_eta);
  * 2.
  * */
+const float cut_photon_pt=30;		// use different photon pT cuts and then look at the jet pT distributions
+
 const float cut_vz = 15;
 
 const float cut_eta = 1.44;
@@ -140,6 +149,8 @@ void photonCuts()
 
   c->InitTree();
 
+  bool passed_photon_pt;
+
   bool passed_event_selection;
 
   bool passed_eta;
@@ -152,7 +163,7 @@ void photonCuts()
   bool passed_jet_photon_deltaR;
   bool passed_jet_photon_deltaPhi;	//  this is not a cut, but an additional selection
 
-  const TString outFile_str="photonCuts_out.root";
+  const TString outFile_str=Form("photonCuts_out_ptG%d.root", cut_photon_pt);
   TFile *outFile = new TFile(outFile_str,"RECREATE");
 
   int count_after_eta=0;			// number of events which pass the eta cut, ie. events where there is a photon that passes eta cut
@@ -263,7 +274,9 @@ void photonCuts()
 	  passed_event_selection = c->skim.pHBHENoiseFilter 			   > 0 	&&
 			  	  	  	  	   c->skim.pPAcollisionEventSelectionPA    > 0  &&
 							   TMath::Abs(c->evt.vz)				   < cut_vz;
-//      if(!passed_event_selection) continue;		// this event failed to pass. Skip to the next of iteration. Go to next event.
+	  if(!passed_event_selection) continue;		// this event failed to pass. Skip to the next of iteration. Go to next event.
+
+      passed_photon_pt=false;	// use different photon pT cuts and then look at the jet pT distributions
 
 	  passed_eta=false;
 	  passed_spike_reject=false;
@@ -273,6 +286,9 @@ void photonCuts()
 	  index_leading_photon=-1;
 	  for( int j = 0; j < c->photon.nPhotons; ++j)
 	  {
+
+		  passed_photon_pt = c->photon.pt[j] > cut_photon_pt;
+		  if(!passed_photon_pt)	continue;
 
 		  passed_eta = TMath::Abs(c->photon.eta[j]) < cut_eta;
 		  passed_spike_reject = (c->photon.sigmaIphiIphi[j] 			> cut_sigmaIphiIphi &&

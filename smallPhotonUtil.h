@@ -108,6 +108,9 @@ TList* getListOfALLKeys(TDirectoryFile* dir, const char* type)
 void saveAllHistogramsToPicture(TDirectoryFile* dir, const char* fileType="gif")
 {
 	TList* keysHisto = getListOfALLKeys(dir, "TH1D");
+	TString dirName ( Form(dir->GetName()));
+	dirName.ReplaceAll(".root","");		// remove filetype ".root" extension if there is any
+
 
 	TH1D*  h;
 	TKey*  key;
@@ -117,7 +120,7 @@ void saveAllHistogramsToPicture(TDirectoryFile* dir, const char* fileType="gif")
 	{
 		h = (TH1D*)key->ReadObj();
 		h->Draw();
-		c1->SaveAs(Form("%s.%s",h->GetName(),fileType));	// name of the file is the name of the histogram
+		c1->SaveAs(Form("%s.%s" ,h->GetName(), fileType));	// name of the file is the name of the histogram
 	}
 	c1->Close();
 }

@@ -20,6 +20,10 @@ void test()
 	  	  cout<< key->GetName() << " - " << key->GetClassName() << endl;
 	}*/
 
-//  saveAllHistogramsToPicture(f);
+  saveAllHistogramsToPicture(f);
 //  saveAllHistogramsToPicture(f,"pdf");
+
+//  TString a(Form("asdasd.root"));
+//  a.ReplaceAll(".root","ASDAS");
+//  cout<<a<<endl;
 }
