@@ -168,7 +168,7 @@ void photonCuts()
   bool passed_jet_photon_deltaR;
   bool passed_jet_photon_deltaPhi;	//  this is not a cut, but an additional selection
 
-  const TString outFile_str=Form("photonCuts_out_ptG%d.root", cut_photon_pt);
+  const TString outFile_str=Form("photonCuts_out_ptG%d.root", (int)cut_photon_pt);
   TFile *outFile = new TFile(outFile_str,"RECREATE");
 
   int count_after_eta=0;			// number of events which pass the eta cut, ie. events where there is a photon that passes eta cut
