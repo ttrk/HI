@@ -20,6 +20,12 @@ using  std::endl;
 //
 
 /*
+	06.03.2015
+	1) Draw jet plots after selecting photons > {40,60,80} GeV
+	2) For ratio plots (pPb/Ppb) change binning and look for trend
+
+ * */
+/*
  * 02.03.22015 : Alex's message
  * just so I don't forget, these were the things mentioned:
 		1) use different photon pT cuts and then look at the jet pT distributions
@@ -89,10 +95,6 @@ Alex
     perform a cross check showing the ratio of all the basic kinematic distributions from the first half of the run ( run < 211313 ) over the second half of the run ( run > 211313 )
     for each of our selection cuts, tell us the number of passing objects or events which pass that cut (for events, photons, and jets)
  */
-/*
- * cuts for photons :
- *
- * */
 
 /*
  * structure of the macro
@@ -112,7 +114,10 @@ Alex
  *			TCut  cut_eta = Form("abs(%s)<(%f)", br_photon_eta, lt_eta);
  * 2.
  * */
-const float cut_photon_pt=30;		// use different photon pT cuts and then look at the jet pT distributions
+
+// cut for photon
+const float cut_photon_pt = 40;		// use different photon pT cuts and then look at the jet pT distributions
+									// Draw jet plots after selecting photons > {40,60,80} GeV
 
 const float cut_vz = 15;
 
@@ -286,10 +291,6 @@ void photonCuts()
 	  index_leading_photon=-1;
 	  for( int j = 0; j < c->photon.nPhotons; ++j)
 	  {
-
-		  passed_photon_pt = c->photon.pt[j] > cut_photon_pt;
-		  if(!passed_photon_pt)	continue;
-
 		  passed_eta = TMath::Abs(c->photon.eta[j]) < cut_eta;
 		  passed_spike_reject = (c->photon.sigmaIphiIphi[j] 			> cut_sigmaIphiIphi &&
 				  	  	  	  	 c->photon.sigmaIetaIeta[j] 			> cut_sigmaIetaIeta_gt &&
@@ -300,6 +301,9 @@ void photonCuts()
 						c->photon.trkSumPtHollowConeDR04[j]  < cut_trackIso	&&
 						c->photon.hadronicOverEm[j]   	     < cut_hadronicOverEm);
 		  passed_purity = c->photon.sigmaIetaIeta[j] < cut_sigmaIetaIeta_lt ;
+
+		  passed_photon_pt = c->photon.pt[j] > cut_photon_pt;
+		  if(!passed_photon_pt)	continue;
 
 		  // eta cut
 		  if(passed_eta)
