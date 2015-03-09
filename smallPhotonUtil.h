@@ -103,9 +103,27 @@ TList* getListOfALLKeys(TDirectoryFile* dir, const char* type)
 }
 
 /*
+ * get list of all histograms under a directory "dir" for objects of a given "type"
+ */
+TList* getListOfALLHistograms(TDirectoryFile* dir)
+{
+	TList* histos=new TList();
+	TList* keysHisto = getListOfALLKeys(dir, "TH1D");
+
+	TIter* iter = new TIter(keysHisto);
+	TKey*  key;
+	while ((key=(TKey*)iter()))
+	{
+		histos->Add((TH1D*)key->ReadObj());
+	}
+
+	return histos;
+}
+
+/*
  * save recursively all the histograms inside a TDirectoryFile "dir" to images
  */
-void saveAllHistogramsToPicture(TDirectoryFile* dir, const char* fileType="gif", const char* directoryToBeSavedIn="")
+void saveAllHistogramsToPicture(TDirectoryFile* dir, const char* fileType="gif", const char* directoryToBeSavedIn="", int styleIndex=0, int rebin=1)
 {
 	TList* keysHisto = getListOfALLKeys(dir, "TH1D");
 
@@ -116,7 +134,20 @@ void saveAllHistogramsToPicture(TDirectoryFile* dir, const char* fileType="gif",
 	while ((key=(TKey*)iter()))
 	{
 		h = (TH1D*)key->ReadObj();
-		h->Draw();
+
+		if(rebin!=1)
+		{
+			h->Rebin(rebin);
+		}
+
+		if(styleIndex==1)
+		{
+			h->Draw("E");
+		}
+		else
+		{
+			h->Draw();
+		}
 
 		if(strcmp(directoryToBeSavedIn, "") == 0)	// save in the current directory if no directory is specified
 		{
@@ -142,7 +173,7 @@ void saveAllHistogramsToPicture(TDirectoryFile* dir, const char* fileType="gif",
  *	dirType = 3 				 --> save files under   /path/to/file/myFile
  *
  * */
-void saveAllHistogramsToPicture(TDirectoryFile* dir, const char* fileType="gif", int dirType=0)
+void saveAllHistogramsToPicture(TDirectoryFile* dir, const char* fileType="gif", int dirType=0, int styleIndex=0, int rebin=1)
 {
 	const char* directoryToBeSavedIn="";
 
@@ -170,7 +201,93 @@ void saveAllHistogramsToPicture(TDirectoryFile* dir, const char* fileType="gif",
 		  directoryToBeSavedIn=dirName;
 	}
 
-	saveAllHistogramsToPicture(dir,fileType,directoryToBeSavedIn);
+	saveAllHistogramsToPicture(dir,fileType,directoryToBeSavedIn, styleIndex, rebin);
+}
+
+/*
+ * MODIFY THIS
+ */
+void saveAllCanvasesToPicture(TList* canvases, const char* fileType="gif", const char* directoryToBeSavedIn="")
+{
+	TCanvas* c;
+	TIter* iter = new TIter(canvases);
+	while ((c=(TCanvas*)iter()))
+	{
+		if(strcmp(directoryToBeSavedIn, "") == 0)	// save in the current directory if no directory is specified
+		{
+			c->SaveAs(Form("%s.%s" ,c->GetName(), fileType));	// name of the file is the name of the histogram
+		}
+		else
+		{
+			c->SaveAs(Form("%s/%s.%s", directoryToBeSavedIn ,c->GetName(), fileType));
+		}
+	}
+//	c->Close();
+}
+
+/*
+ *  divide histograms element wise
+ */
+TList* divideHistograms(TList* histoList1, TList* histoList2)
+{
+	TH1D::SetDefaultSumw2();
+	TList* histos_Division=new TList();
+
+	TH1D*  h1;
+	TH1D*  h2;
+	TH1D*  h_division;
+	for(int i=0; i<histoList1->GetEntries(); i++)
+	{
+		h1=(TH1D*)histoList1->At(i);
+		h2=(TH1D*)histoList2->At(i);
+
+//		cout<<h1->GetNbinsX()<<endl;
+//		cout<<h2->GetNbinsX()<<endl;
+
+//		h1->Rebin(5);
+//		h2->Rebin(5);
+
+		h1->Scale(1/(h1->GetEntries()));
+		h2->Scale(1/(h2->GetEntries()));
+
+//		cout<<h1->GetNbinsX()<<endl;
+//		cout<<h2->GetNbinsX()<<endl;
+
+		h_division=new TH1D(h1->GetName(),h1->GetTitle(),h1->GetNbinsX(),h1->GetXaxis()->GetXmin(),h1->GetXaxis()->GetXmax());
+//		h_division=new TH1D();
+		h_division->Divide(h1,h2);
+		h_division->SetName(Form("%s_ratio",h1->GetName()));
+		h_division->SetTitle(Form("ratio of %s",h1->GetTitle()));
+
+		histos_Division->Add(h_division);
+	}
+
+	return histos_Division;
+}
+
+/*
+ *  divide histograms from 2 directories element wise
+ */
+TList* divideHistograms(TDirectoryFile* dir1, TDirectoryFile* dir2)
+{
+	TList* histoList1=getListOfALLHistograms(dir1);
+	TList* histoList2=getListOfALLHistograms(dir2);
+
+	return divideHistograms(histoList1, histoList2);
+}
+
+void saveAllHistogramsToFile(const char* fileName, TList* histos)
+{
+	TFile* f=new TFile(fileName, "RECREATE");
+
+	TH1D* h;
+	TIter* iter = new TIter(histos);
+	while ((h=(TH1D*)iter()))
+	{
+		h->Write();
+	}
+
+	f->Close();
 }
 
 #endif /* SMALLPHOTONUTIL_H_ */

@@ -9,20 +9,102 @@ const char *type1 = "TDirectoryFile";
 
 void test()
 {
+  TList* histos_pt40=getListOfALLHistograms(new TFile("~/Desktop/histos/photonCuts_out_all_pt40_run0.root","READ"));
+  TList* histos_pt60=getListOfALLHistograms(new TFile("~/Desktop/histos/photonCuts_out_all_pt60_run0.root","READ"));
+  TList* histos_pt80=getListOfALLHistograms(new TFile("~/Desktop/histos/photonCuts_out_all_pt80_run0.root","READ"));
 
-  TFile *f = new TFile("~/Desktop/photonCuts_out_pt40_run1.root","READ");
-//  TSystem t;
-//  const char* baseName=gSystem->BaseName(f->GetName());
-////    const char* baseName=basename(f->GetName());	// NOT working
-//  TString dirName(baseName);
-//  dirName.ReplaceAll(".root","");
-//  gSystem->mkdir(dirName);
+  TList* canvases=new TList();
+
+  TH1D* h1;
+  TH1D* h2;
+  TH1D* h3;
+  TCanvas* c1=new TCanvas("c1");	// must be here
+
+  double xcor1;
+  double ycor1;
+  double xcoroff;
+  double ycoroff;
+  for(int i=0; i<histos_pt40->GetEntries(); i++)
+  {
+		  h1=(TH1D*)histos_pt40->At(i);
+		  h2=(TH1D*)histos_pt60->At(i);
+		  h3=(TH1D*)histos_pt80->At(i);
+
+/*		  cout<<h1->GetNbinsX()<<endl;
+		  cout<<h1->GetXaxis()->GetXmin()<<endl;
+		  cout<<h1->GetXaxis()->GetXmax()<<endl;*/
+
+		  h1->Rebin(1);
+		  h2->Rebin(1);
+		  h3->Rebin(1);
+
+//		  h1->SetAxisRange(20,200);
+//		  h1->SetBins(20,h1->GetXaxis()->GetXmin(),h1->GetXaxis()->GetXmax());
+//		  h2->SetBins(20,h2->GetXaxis()->GetXmin(),h2->GetXaxis()->GetXmax());
+//		  h3->SetBins(20,h3->GetXaxis()->GetXmin(),h3->GetXaxis()->GetXmax());
+
+/*		  cout<<"-----------"<<endl;
+		  cout<<h1->GetNbinsX()<<endl;
+		  cout<<h1->GetXaxis()->GetXmin()<<endl;
+		  cout<<h1->GetXaxis()->GetXmax()<<endl;*/
+
+		  h1->Draw();
+		  h2->Draw("same");
+		  h3->Draw("same");
+
+		  h1->SetLineWidth(2);
+		  h2->SetLineWidth(2);
+		  h3->SetLineWidth(2);
+
+		  h2->SetLineColor(kRed);
+		  h3->SetLineColor(kGreen);
+
+		  xcor1=0.8;
+		  ycor1=0.55;
+		  xcoroff=0.2;
+		  ycoroff=0.3;
+
+		  TLegend* leg = new TLegend(xcor1,ycor1,xcor1+xcoroff,ycor1+xcoroff);
+		  leg->AddEntry(h1, "p_{T}^{#gamma}>40");
+		  leg->AddEntry(h2, "p_{T}^{#gamma}>60");
+		  leg->AddEntry(h3, "p_{T}^{#gamma}>80");
+		  leg->SetHeader("different p_{T}^{#gamma} cuts");
+		  leg->Draw();
+
+//		  c1->SetLogy();		// some curves may not appear in linear scale
+		  c1->SetName(h1->GetName());
+
+		  c1->SaveAs(Form("~/Desktop/histos/drawsameAll1/%s.gif",c1->GetName()));
+
+//		  canvases->Add();
+  }
+
+  c1->Close();
+
+//  saveAllCanvasesToPicture(canvases, "gif","~/Desktop/histos/cnvs");
+
+  //  TFile *f = new TFile("~/Desktop/photonCuts_out_full.root","READ");
+  /*TSystem t;
+  const char* baseName=gSystem->BaseName(f->GetName());
+//    const char* baseName=basename(f->GetName());	// NOT working
+  TString dirName(baseName);
+  dirName.ReplaceAll(".root","");
+  gSystem->mkdir(dirName);*/
 
 
 //  saveAllHistogramsToPicture(f,"gif", dirName);
-//    saveAllHistogramsToPicture(f,"gif",1);
+//  saveAllHistogramsToPicture(f,"gif",1);
 
-	TH1D*  h;
+/*  TList* histos=getListOfALLHistograms(f);
+
+  TH1D*  h;
+  TIter* iter = new TIter(histos);
+  while ((h=(TH1D*)iter()))
+  	{
+  		cout << h->GetName() << endl;
+  	}*/
+
+/*	TH1D*  h;
 	TH1D*  h2;
 	TKey*  key;
     TList* keysHisto=getListOfALLKeys(f, "TH1D");
@@ -39,11 +121,26 @@ void test()
 		    TCanvas* c2=new TCanvas();
 			h2->Draw();
 		}
-	}
+	}*/
+
+
 
 //  saveAllHistogramsToPicture(f,"pdf");
 
 //  TString a(Form("asdasd.root"));
 //  a.ReplaceAll(".root","ASDAS");
 //  cout<<a<<endl;
+}
+
+void test2()
+{
+	int ptCut=40;
+	TFile* f1=new TFile(Form("~/Desktop/histos/photonCuts_out_all_pt%d_run1.root", ptCut),"READ");
+	TFile* f2=new TFile(Form("~/Desktop/histos/photonCuts_out_all_pt%d_run2.root", ptCut),"READ");
+
+	TList* histos_Division=divideHistograms(f1,f2);
+	saveAllHistogramsToFile(Form("~/Desktop/histos/photonCuts_out_all_pt%d_ratio.root", ptCut),histos_Division);
+
+	TFile* f_ratio=new TFile(Form("~/Desktop/histos/photonCuts_out_all_pt%d_ratio.root", ptCut),"READ");
+	saveAllHistogramsToPicture(f_ratio, "gif", 3, 1);
 }

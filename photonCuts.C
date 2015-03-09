@@ -10,7 +10,7 @@
 #include <iostream>
 #include <map>
 
-//#include "makePlotsUtil.h"
+#include "smallPhotonUtil.h"
 
 // necessary for GCC C++ Compiler to work
 #include <string>
@@ -148,7 +148,7 @@ const float cut_jet_eta = 3;
 const float cut_jet_photon_deltaR = 0.4;
 const float cut_jet_photon_deltaPhi = (7 * TMath::Pi()) / 8 ;	// 7/8 * TMath::Pi() --> evaluates to 0;
 
-void photonCuts(float photon_pt_Cut=0, int runHalf_index=0)
+void photonCuts(float photon_pt_Cut=0, int runHalf_index=0, const char* outFile_prefix="photonCuts_out")
 {
 	const float cut_photon_pt = photon_pt_Cut;	// use different photon pT cuts and then look at the jet pT distributions
 	                                            // Draw jet plots after selecting photons > {40,60,80} GeV
@@ -184,7 +184,7 @@ void photonCuts(float photon_pt_Cut=0, int runHalf_index=0)
   bool passed_jet_photon_deltaR;
   bool passed_jet_photon_deltaPhi;	//  this is not a cut, but an additional selection
 
-  const TString outFile_str=Form("photonCuts_out_pt%d_run%d.root", (int)cut_photon_pt, index_runHalf);
+  const TString outFile_str=Form("%s_pt%d_run%d.root", outFile_prefix,(int)cut_photon_pt, index_runHalf);
   TFile *outFile = new TFile(outFile_str,"RECREATE");
 
   int count_after_eta=0;			// number of events which pass the eta cut, ie. events where there is a photon that passes eta cut
@@ -192,7 +192,7 @@ void photonCuts(float photon_pt_Cut=0, int runHalf_index=0)
   int count_after_iso=0;			// number of events whose leading photon after the eta cut passes isolation cut and previous cuts
   int count_after_purity=0;			// number of events whose leading photon after the eta cut passes purity enhancement cut and previous cuts
 
-  	  	  	  	  	  	  	  	  	// selected jet : a jet that passes jet_pt and jet_eta cut
+  	  	  	  	  	  	  	  	  	// selected jet : a jet that passes jet_pt, jet_eta cut and deltaR(jet,photon) cut
   int numJets_after_eta=0;			// number of selected jets in an event which passes the eta cut
   int numJets_after_spike_reject=0;	// number of selected jets in an event which passes the spike rejection cut and all previous cuts
   int numJets_after_iso=0;			// number of selected jets in an event which passes the isolation cut and all previous cuts
@@ -208,8 +208,8 @@ void photonCuts(float photon_pt_Cut=0, int runHalf_index=0)
 
   std::cout << "number of entries: " << c->GetEntries() << std::endl;
 
-  TCanvas *c1 = new TCanvas();
-  c->photonTree->Draw("pt");
+//  TCanvas *c1 = new TCanvas();
+//  c->photonTree->Draw("pt");
 
   // PHOTON histograms
   TH1D *photon_pt_after_eta = new TH1D("photon_pt_after_eta","p_{T}^{#gamma} after |#eta^{#gamma}|<1.44;p_{T}",100, 0, 200);
@@ -281,8 +281,8 @@ void photonCuts(float photon_pt_Cut=0, int runHalf_index=0)
   TH1D *jet_count_after_purity_dPhiCut = new TH1D("jet_count_after_purity_dPhiCut","number of selected jets with #Delta#phi_{J,#gamma}>#frac{7}{8}#pi after purity enhancement cut",100, 0,jet_count_last_bin);
   TH1D *jet_photon_DPHI_after_purity_dPhiCut = new TH1D("jet_photon_DPHI_after_purity_dPhiCut","#Delta#phi_{J,#gamma} with #Delta#phi_{J,#gamma}>#frac{7}{8}#pi after purity enhancement cut;\phi",100, jet_photon_DPHI_dPhiCut_firstBin, TMath::Pi());
 
-//  Long64_t entries = c->photonTree->GetEntries();
-    Long64_t entries = 10000;	// work with a smaller set to get faster results
+  Long64_t entries = c->photonTree->GetEntries();
+//    Long64_t entries = 10000;	// work with a smaller set to get faster results
 
     int index_leading_photon;
     float jet_photon_deltaR;
@@ -290,6 +290,12 @@ void photonCuts(float photon_pt_Cut=0, int runHalf_index=0)
 //  int index_leading_jet;
   for( Long64_t i = 0; i < entries; ++i)
   {
+	  // check if the program is running at all
+	  if(i%1000000==0)
+	  {
+		  cout << "current entry = " << i <<endl;
+	  }
+
 	  c->GetEntry(i);
 
 	  if(index_runHalf == 1){	// 1 : the code runs on the first  half
@@ -612,6 +618,49 @@ void photonCuts(float photon_pt_Cut=0, int runHalf_index=0)
 
   c->inf->Close();
   outFile->Close();
+}
+
+void produceRatioHistograms()
+{
+	const char* dirName="~/Desktop/histos/";
+
+	TFile* f1=new TFile(Form("%s/photonCuts_out_all_pt40_run1.root",dirName), "READ");
+	TFile* f2=new TFile(Form("%s/photonCuts_out_all_pt40_run2.root",dirName), "READ");
+	TList* histos_Ratio_pt40 = divideHistograms(f1,f2);
+
+	const char* outFile_str_pt40 = "~/Desktop/histos/photonCuts_out_full_pt40_ratio.root";
+	saveAllHistogramsToFile(outFile_str_pt40, histos_Ratio_pt40);
+}
+
+void saveAllToImage()
+{
+	const char* dirName="~/Desktop/histos/";
+
+	const char* fileNames[] = {"photonCuts_out_all_pt40_run0.root",
+							   "photonCuts_out_all_pt40_run1.root",
+							   "photonCuts_out_all_pt40_run2.root"};
+
+	int len_fileNames=(sizeof (fileNames) / sizeof (*fileNames));
+	TFile* f;
+	for(int i=0; i<len_fileNames; i++)
+	{
+		f=new TFile(Form("%s/%s",dirName,fileNames[i]),"READ");
+		saveAllHistogramsToPicture(f,"gif",3);
+	}
+}
+
+int main()
+{
+//	photonCuts(40,1,"photonCuts_out_full");
+//	photonCuts(40,2,"photonCuts_out_all");
+
+	photonCuts(60,1,"photonCuts_out_all");
+	photonCuts(60,2,"photonCuts_out_all");
+
+	photonCuts(80,1,"photonCuts_out_all");
+	photonCuts(80,2,"photonCuts_out_all");
+
+	return 0;
 }
 
 Double_t getDPHI(Double_t phi1, Double_t phi2) {
