@@ -10,7 +10,7 @@ const char *type1 = "TDirectoryFile";
 void test()
 {
 
-  TFile *f = new TFile("~/Desktop/photonCuts_out.root","READ");
+  TFile *f = new TFile("~/Desktop/photonCuts_out_pt40_run2.root","READ");
 //  TSystem t;
 //  const char* baseName=gSystem->BaseName(f->GetName());
 ////    const char* baseName=basename(f->GetName());	// NOT working
@@ -20,7 +20,7 @@ void test()
 
 
 //  saveAllHistogramsToPicture(f,"gif", dirName);
-    saveAllHistogramsToPicture(f,"gif",3);
+    saveAllHistogramsToPicture(f,"gif",1);
 
 //  saveAllHistogramsToPicture(f,"pdf");
 

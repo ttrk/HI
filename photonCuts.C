@@ -115,8 +115,15 @@ Alex
  * 2.
  * */
 
+// cut for run
+// number perform a cross check showing the ratio of all the basic kinematic distributions from the first half of the run ( run < 211313 ) over the second half of the run ( run > 211313 )
+const int  cut_runNumber = 211313;
+//const int  index_runHalf = 1; // 0 : the code runs on all the events.
+                              // 1 : the code runs on the first  half
+                              // 2 : the code runs on the second half
+
 // cut for photon
-const float cut_photon_pt = 40;		// use different photon pT cuts and then look at the jet pT distributions
+//const float cut_photon_pt = 40;		// use different photon pT cuts and then look at the jet pT distributions
 									// Draw jet plots after selecting photons > {40,60,80} GeV
 
 const float cut_vz = 15;
@@ -141,8 +148,15 @@ const float cut_jet_eta = 3;
 const float cut_jet_photon_deltaR = 0.4;
 const float cut_jet_photon_deltaPhi = (7 * TMath::Pi()) / 8 ;	// 7/8 * TMath::Pi() --> evaluates to 0;
 
-void photonCuts()
+void photonCuts(float photon_pt_Cut=0, int runHalf_index=0)
 {
+	const float cut_photon_pt = photon_pt_Cut;	// use different photon pT cuts and then look at the jet pT distributions
+	                                            // Draw jet plots after selecting photons > {40,60,80} GeV
+	const int   index_runHalf = runHalf_index;  // 0 : the code runs on all the events.
+                                                // 1 : the code runs on the first  half
+                                                // 2 : the code runs on the second half
+
+
   const TString inFile_str="/mnt/hadoop/cms/store/user/luck/2014-photon-forests/pPb_DATA_photon30trig_localJEC_v1.root";
   HiForest *c = new HiForest(inFile_str, "forest", cPPb, false);
 
@@ -153,6 +167,8 @@ void photonCuts()
   c->hasSkimTree = true;
 
   c->InitTree();
+
+  bool passed_runNumber;
 
   bool passed_photon_pt;
 
@@ -168,7 +184,7 @@ void photonCuts()
   bool passed_jet_photon_deltaR;
   bool passed_jet_photon_deltaPhi;	//  this is not a cut, but an additional selection
 
-  const TString outFile_str=Form("photonCuts_out_ptG%d.root", (int)cut_photon_pt);
+  const TString outFile_str=Form("photonCuts_out_pt%d_run%d.root", (int)cut_photon_pt, index_runHalf);
   TFile *outFile = new TFile(outFile_str,"RECREATE");
 
   int count_after_eta=0;			// number of events which pass the eta cut, ie. events where there is a photon that passes eta cut
@@ -275,6 +291,21 @@ void photonCuts()
   for( Long64_t i = 0; i < entries; ++i)
   {
 	  c->GetEntry(i);
+
+	  if(index_runHalf == 1){	// 1 : the code runs on the first  half
+		  passed_runNumber = c->evt.run < cut_runNumber;
+	  }
+	  else if(index_runHalf == 2){	// // 2 : the code runs on the second half
+		  passed_runNumber = c->evt.run > cut_runNumber;
+	  }
+	  else if(index_runHalf == 0){	// 0 : the code runs on all the events.
+		  passed_runNumber=true;
+	  }
+	  else{
+		  cout << "Enter a valid index for run number" << endl;
+		  passed_runNumber=false;
+	  }
+	  if(!passed_runNumber)	continue;
 
 	  passed_event_selection = c->skim.pHBHENoiseFilter 			   > 0 	&&
 			  	  	  	  	   c->skim.pPAcollisionEventSelectionPA    > 0  &&
