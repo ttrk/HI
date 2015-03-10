@@ -328,6 +328,10 @@ void photonCuts(float photon_pt_Cut=0, int runHalf_index=0, const char* outFile_
 	  index_leading_photon=-1;
 	  for( int j = 0; j < c->photon.nPhotons; ++j)
 	  {
+		  passed_photon_pt = c->photon.pt[j] > cut_photon_pt;
+		  if(!passed_photon_pt)	break;		// if the first photon cannot pass pT cut, then the rest also cannot pass it.
+		  	  	  	  	  	  	  	  	  	// no need to look at the rest of the photons.
+
 		  passed_eta = TMath::Abs(c->photon.eta[j]) < cut_eta;
 		  passed_spike_reject = (c->photon.sigmaIphiIphi[j] 			> cut_sigmaIphiIphi &&
 				  	  	  	  	 c->photon.sigmaIetaIeta[j] 			> cut_sigmaIetaIeta_gt &&
@@ -338,9 +342,6 @@ void photonCuts(float photon_pt_Cut=0, int runHalf_index=0, const char* outFile_
 						c->photon.trkSumPtHollowConeDR04[j]  < cut_trackIso	&&
 						c->photon.hadronicOverEm[j]   	     < cut_hadronicOverEm);
 		  passed_purity = c->photon.sigmaIetaIeta[j] < cut_sigmaIetaIeta_lt ;
-
-		  passed_photon_pt = c->photon.pt[j] > cut_photon_pt;
-		  if(!passed_photon_pt)	continue;
 
 		  // eta cut
 		  if(passed_eta)
@@ -651,14 +652,14 @@ void saveAllToImage()
 
 int main()
 {
-//	photonCuts(40,1,"photonCuts_out_full");
-//	photonCuts(40,2,"photonCuts_out_all");
+	photonCuts(40,1,"photonCuts_out_all");
+	photonCuts(40,2,"photonCuts_out_all");
 
-	photonCuts(60,1,"photonCuts_out_all");
-	photonCuts(60,2,"photonCuts_out_all");
-
-	photonCuts(80,1,"photonCuts_out_all");
-	photonCuts(80,2,"photonCuts_out_all");
+//	photonCuts(60,1,"photonCuts_out_all");
+//	photonCuts(60,2,"photonCuts_out_all");
+//
+//	photonCuts(80,1,"photonCuts_out_all");
+//	photonCuts(80,2,"photonCuts_out_all");
 
 	return 0;
 }
