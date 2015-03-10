@@ -619,16 +619,16 @@ void photonCuts(float photon_pt_Cut=0, int runHalf_index=0, const char* outFile_
   outFile->Close();
 }
 
-void produceRatioHistograms()
+void produceRatioHistograms(const char* pt="40")
 {
-	const char* dirName="~/Desktop/histos/";
+	const char* dirName="~/Desktop/histos";
 
-	TFile* f1=new TFile(Form("%s/photonCuts_out_all_pt40_run1.root",dirName), "READ");
-	TFile* f2=new TFile(Form("%s/photonCuts_out_all_pt40_run2.root",dirName), "READ");
-	TList* histos_Ratio_pt40 = divideHistogramList(f1,f2);
+	TFile* f1=new TFile(Form("%s/photonCuts_out_all_pt%s_run1.root",dirName,pt), "READ");
+	TFile* f2=new TFile(Form("%s/photonCuts_out_all_pt%s_run2.root",dirName,pt), "READ");
+	TList* histos_Ratio = divideHistogramList(f1,f2);
 
-	const char* outFile_str_pt40 = "~/Desktop/histos/photonCuts_out_full_pt40_ratio.root";
-	saveAllHistogramsToFile(outFile_str_pt40, histos_Ratio_pt40);
+	const char* outFile_str = Form("%s/photonCuts_out_all_pt%s_ratio.root", dirName, pt);
+	saveAllHistogramsToFile(outFile_str, histos_Ratio);
 }
 
 void saveAllToImage()
