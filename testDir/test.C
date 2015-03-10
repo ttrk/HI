@@ -138,7 +138,7 @@ void test2()
 	TFile* f1=new TFile(Form("~/Desktop/histos/photonCuts_out_all_pt%d_run1.root", ptCut),"READ");
 	TFile* f2=new TFile(Form("~/Desktop/histos/photonCuts_out_all_pt%d_run2.root", ptCut),"READ");
 
-	TList* histos_Division=divideHistograms(f1,f2);
+	TList* histos_Division=divideHistogramList(f1,f2);
 	saveAllHistogramsToFile(Form("~/Desktop/histos/photonCuts_out_all_pt%d_ratio.root", ptCut),histos_Division);
 
 	TFile* f_ratio=new TFile(Form("~/Desktop/histos/photonCuts_out_all_pt%d_ratio.root", ptCut),"READ");

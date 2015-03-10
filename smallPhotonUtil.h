@@ -228,7 +228,7 @@ void saveAllCanvasesToPicture(TList* canvases, const char* fileType="gif", const
 /*
  *  divide histograms element wise
  */
-TList* divideHistograms(TList* histoList1, TList* histoList2)
+TList* divideHistogramList(TList* histoList1, TList* histoList2)
 {
 	TH1D::SetDefaultSumw2();
 	TList* histos_Division=new TList();
@@ -268,12 +268,12 @@ TList* divideHistograms(TList* histoList1, TList* histoList2)
 /*
  *  divide histograms from 2 directories element wise
  */
-TList* divideHistograms(TDirectoryFile* dir1, TDirectoryFile* dir2)
+TList* divideHistogramList(TDirectoryFile* dir1, TDirectoryFile* dir2)
 {
 	TList* histoList1=getListOfALLHistograms(dir1);
 	TList* histoList2=getListOfALLHistograms(dir2);
 
-	return divideHistograms(histoList1, histoList2);
+	return divideHistogramList(histoList1, histoList2);
 }
 
 void saveAllHistogramsToFile(const char* fileName, TList* histos)
@@ -288,6 +288,53 @@ void saveAllHistogramsToFile(const char* fileName, TList* histos)
 	}
 
 	f->Close();
+}
+
+/*
+ * get a list files and folders in the given directory
+ * https://root.cern.ch/phpBB3/viewtopic.php?f=3&t=12793
+ *
+ * default option : all files in the current directory will be returned
+ *
+ *
+ *
+ * how to access the result :
+ *
+    TObjString* tmpObjStr;
+    TString     tmpStr;
+	for(int i=0; i<list->GetEntries(); i++)
+	{
+		tmpObjStr=(TObjString*)list->At(i);
+		tmpStr   =tmpObjStr->GetString();
+		cout     << tmpStr <<endl;
+	}
+ */
+TList* getFileNames(const char *dirname=".", const char *ext="")
+{
+   // ignore errors of Eclipse about TSystem objects
+   TSystemDirectory dir(dirname, dirname);
+   TList* files = dir.GetListOfFiles();
+   TList* outFileNames=new TList();
+   if (files) {
+      TSystemFile *file;
+      // TString cannot be stored in a TCollection... use TObjString instead.
+      // https://root.cern.ch/root/htmldoc/TString.html
+      TObjString* fname;
+      TIter next(files);
+      while ((file=(TSystemFile*)next())) {
+         fname = new TObjString(file->GetName());
+         if (fname->GetString().EndsWith(ext)) {
+//            cout << fname->GetString().Data() << endl;
+            	outFileNames->Add(fname);
+         }
+      }
+   }
+   else
+   {
+	   cout << "no files with given extension found in : " << dirname << endl;
+   }
+
+   return outFileNames;
 }
 
 /*
