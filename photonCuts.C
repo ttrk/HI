@@ -398,8 +398,8 @@ void photonCuts(float photon_pt_Cut=0, int runHalf_index=0, const char* outFile_
 
 	  for( int j = 0; j < c->akPu3PF.nref; ++j)
 	  {
-		  jet_photon_deltaR   =   getDR(c->akPu3PF.jtphi[j],c->photon.phi[index_leading_photon],
-				  	  	  	            c->akPu3PF.jteta[j],c->photon.eta[index_leading_photon]);
+		  jet_photon_deltaR   =   getDR(c->akPu3PF.jteta[j],c->photon.phi[j],
+				  	  	  	            c->akPu3PF.jteta[index_leading_photon],c->photon.phi[index_leading_photon]);
 		  jet_photon_deltaPhi = getDPHI(c->akPu3PF.jtphi[j],c->photon.phi[index_leading_photon]);
 
 		  passed_jet_photon_deltaPhi = TMath::Abs(jet_photon_deltaPhi) > cut_jet_photon_deltaPhi;
@@ -557,8 +557,6 @@ void photonCuts(float photon_pt_Cut=0, int runHalf_index=0, const char* outFile_
   photon_eta_after_purity->Write();
   photon_phi_after_purity->Write();
 
-//  photon_pt_after_eta->SaveAs(Form("gifs/%s.gif",photon_pt_after_eta->GetName()));
-
   // SELECTED JET histograms
   const char *jet_dir="jets";
   outFile->mkdir(jet_dir);
@@ -662,26 +660,4 @@ int main()
 //	photonCuts(80,2,"photonCuts_out_all");
 
 	return 0;
-}
-
-Double_t getDPHI(Double_t phi1, Double_t phi2) {
-    Double_t dphi = phi1 - phi2;
-    if (dphi > 3.141592653589)
-        dphi = dphi - 2. * 3.141592653589;
-    if (dphi <= -3.141592653589)
-        dphi = dphi + 2. * 3.141592653589;
-    if (TMath::Abs(dphi) > 3.141592653589) {
-        cout << " commonUtility::getDPHI error!!! dphi is bigger than 3.141592653589 " << endl;
-    }
-    return dphi;
-}
-
-Double_t getDETA(Double_t eta1, Double_t eta2){
-	return eta1 - eta2;
-}
-
-Double_t getDR(Double_t phi1, Double_t phi2, Double_t eta1, Double_t eta2){
-	Double_t dphi = getDPHI(phi1,phi2);
-	Double_t deta = getDETA(eta1,eta2);
-	return TMath::Sqrt( deta*deta+dphi*dphi );
 }
