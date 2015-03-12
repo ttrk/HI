@@ -99,7 +99,7 @@ void test()
 
   TH1D*  h;
   TIter* iter = new TIter(histos);
-  while ((h=(TH1D*)iter()))
+  while ((h=(TH1D*)iter->Next()))
   	{
   		cout << h->GetName() << endl;
   	}*/
@@ -110,7 +110,7 @@ void test()
     TList* keysHisto=getListOfALLKeys(f, "TH1D");
 	TIter* iter = new TIter(keysHisto);
 	TCanvas* c1=new TCanvas();
-	while ((key=(TKey*)iter()))
+	while ((key=(TKey*)iter->Next()))
 	{
 		h = (TH1D*)key->ReadObj();
 		h2= (TH1D*)key->ReadObj();

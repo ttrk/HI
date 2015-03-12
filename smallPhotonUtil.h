@@ -8,29 +8,32 @@
 #ifndef SMALLPHOTONUTIL_H_
 #define SMALLPHOTONUTIL_H_
 
+#include <TCut.h>               // compiling macros give error if this is not included.
+#include <TDirectoryFile.h>     // compiling macros give error if this is not included.
+#include <TSystem.h>	        // compiling macros give error if this is not included.
+#include <TSystemDirectory.h>	// compiling macros give error if this is not included.
+#include <TSystemFile.h>    	// compiling macros give error if this is not included.
+
 #include <string>
 
 using  std::string;
 using  std::cout;
 using  std::endl;
 
-void mergeCuts(TCut cut, TCut* cuts);
-void mergeCuts(TCut cut, TCut* cuts, int len);
-TList* getListOfALLKeys(TDirectoryFile* dir);
-TList* getListOfALLKeys(TDirectoryFile* dir, const char* type);
-//void saveAllHistogramsToPicture(TDirectoryFile* dir, const char* fileType="gif");		// this line gives error if I use default value option (here const char* fileType="gif") in the function definition.
-
-/*
- * merge a set of cuts into a single one. the resulting cut is the cut that satisfies all individual cuts
- *
- * need to initialize "cut" before this function.
- */
-void mergeCuts(TCut cut, TCut* cuts)
-{
-	// http://stackoverflow.com/questions/4108313/how-do-i-find-the-length-of-an-array
-	int len = (sizeof (cuts) / sizeof (*cuts));
-	mergeCuts(cut,cuts,len);
-}
+void     mergeCuts(TCut cut, TCut* cuts, int len);
+void     mergeCuts(TCut cut, TCut* cuts);
+TList*   getListOfALLKeys(TDirectoryFile* dir);
+TList*   getListOfALLKeys(TDirectoryFile* dir, const char* type);
+TList*   getListOfALLHistograms(TDirectoryFile* dir);
+void     saveAllHistogramsToPicture(TDirectoryFile* dir, const char* fileType, const char* directoryToBeSavedIn, int styleIndex, int rebin);
+void     saveAllHistogramsToPicture(TDirectoryFile* dir, const char* fileType, int dirType, int styleIndex, int rebin);
+void     saveAllCanvasesToPicture(TList* canvases, const char* fileType, const char* directoryToBeSavedIn);
+TList*   divideHistogramList(TList* histoList1, TList* histoList2);
+TList*   divideHistogramList(TDirectoryFile* dir1, TDirectoryFile* dir2);
+Double_t getDR( Double_t eta1, Double_t phi1, Double_t eta2, Double_t phi2);
+Double_t getDPHI( Double_t phi1, Double_t phi2);
+Double_t getDETA(Double_t eta1, Double_t eta2);
+//void     saveAllHistogramsToPicture(TDirectoryFile* dir, const char* fileType="gif");		// this line gives error if I use default value option (here const char* fileType="gif") in the function definition.
 
 /*
  * merge a set of cuts into a single one. the resulting cut is the cut that satisfies all individual cuts
@@ -53,9 +56,20 @@ void mergeCuts(TCut cut, TCut* cuts, int len)
 	}
 }
 
+/*
+ * merge a set of cuts into a single one. the resulting cut is the cut that satisfies all individual cuts
+ *
+ * need to initialize "cut" before this function.
+ */
+void mergeCuts(TCut cut, TCut* cuts)
+{
+	// http://stackoverflow.com/questions/4108313/how-do-i-find-the-length-of-an-array
+	int len = (sizeof (cuts) / sizeof (*cuts));
+	mergeCuts(cut,cuts,len);
+}
+
 TList* getListOfALLKeys(TDirectoryFile* dir)
 {
-	const char *className_Dir = "TDirectoryFile";
 
 	TList* keysInDir = dir->GetListOfKeys();
 	TIter* iter = new TIter(keysInDir);
@@ -65,7 +79,7 @@ TList* getListOfALLKeys(TDirectoryFile* dir)
 	TList* keys=new TList();
 	TList *newKeys=new TList();
 
-	while ((key=(TKey*)iter())) {
+	while ((key=(TKey*)iter->Next())) {
 
 		keys->Add(key);
 
@@ -90,7 +104,7 @@ TList* getListOfALLKeys(TDirectoryFile* dir, const char* type)
 
 	TIter* iter = new TIter(keysALL);
 	TKey*  key;
-	while ((key=(TKey*)iter()))
+	while ((key=(TKey*)iter->Next()))
 	{
 //		http://www.cplusplus.com/reference/cstring/strcmp/
 		if(strcmp(key->GetClassName(), type) == 0)
@@ -112,7 +126,7 @@ TList* getListOfALLHistograms(TDirectoryFile* dir)
 
 	TIter* iter = new TIter(keysHisto);
 	TKey*  key;
-	while ((key=(TKey*)iter()))
+	while ((key=(TKey*)iter->Next()))
 	{
 		histos->Add((TH1D*)key->ReadObj());
 	}
@@ -131,7 +145,7 @@ void saveAllHistogramsToPicture(TDirectoryFile* dir, const char* fileType="gif",
 	TKey*  key;
 	TIter* iter = new TIter(keysHisto);
 	TCanvas* c1=new TCanvas();
-	while ((key=(TKey*)iter()))
+	while ((key=(TKey*)iter->Next()))
 	{
 		h = (TH1D*)key->ReadObj();
 
@@ -183,21 +197,24 @@ void saveAllHistogramsToPicture(TDirectoryFile* dir, const char* fileType="gif",
 	}
 	else if(dirType==1)
 	{
-		  const char* baseName=gSystem->BaseName(dir->GetName()); 	//    const char* baseName=basename(f->GetName());	does NOT work
+		  TSystem* sys=new TSystem();
+		  const char* baseName=sys->BaseName(dir->GetName()); 	//    const char* baseName=basename(f->GetName());	does NOT work
 		  TString dirName(baseName);
 		  dirName.ReplaceAll(".root","");
-		  gSystem->mkdir(dirName);
+		  sys->mkdir(dirName);
 		  directoryToBeSavedIn=dirName;
 	}
 	else if(dirType==2)
 	{
-		directoryToBeSavedIn=gSystem->DirName(dir->GetName());
+		TSystem* sys=new TSystem();
+		directoryToBeSavedIn=sys->DirName(dir->GetName());
 	}
 	else if(dirType==3)
 	{
+		  TSystem* sys=new TSystem();
 		  TString dirName(dir->GetName());
 		  dirName.ReplaceAll(".root","");
-		  gSystem->mkdir(dirName);
+		  sys->mkdir(dirName);
 		  directoryToBeSavedIn=dirName;
 	}
 
@@ -211,7 +228,7 @@ void saveAllCanvasesToPicture(TList* canvases, const char* fileType="gif", const
 {
 	TCanvas* c;
 	TIter* iter = new TIter(canvases);
-	while ((c=(TCanvas*)iter()))
+	while ((c=(TCanvas*)iter->Next()))
 	{
 		if(strcmp(directoryToBeSavedIn, "") == 0)	// save in the current directory if no directory is specified
 		{
@@ -282,7 +299,7 @@ void saveAllHistogramsToFile(const char* fileName, TList* histos)
 
 	TH1D* h;
 	TIter* iter = new TIter(histos);
-	while ((h=(TH1D*)iter()))
+	while ((h=(TH1D*)iter->Next()))
 	{
 		h->Write();
 	}

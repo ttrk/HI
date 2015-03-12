@@ -156,6 +156,9 @@ void photonCuts(float photon_pt_Cut=0, int runHalf_index=0, const char* outFile_
                                                 // 1 : the code runs on the first  half
                                                 // 2 : the code runs on the second half
 
+	cout << "photon_pt_Cut = "  << photon_pt_Cut  <<endl;
+	cout << "runHalf_index = "  << runHalf_index  <<endl;
+	cout << "outFile_prefix = " << outFile_prefix <<endl;
 
   const TString inFile_str="/mnt/hadoop/cms/store/user/luck/2014-photon-forests/pPb_DATA_photon30trig_localJEC_v1.root";
   HiForest *c = new HiForest(inFile_str, "forest", cPPb, false);
@@ -396,6 +399,7 @@ void photonCuts(float photon_pt_Cut=0, int runHalf_index=0, const char* outFile_
 	  numJets_after_iso_dPhiCut=0;
 	  numJets_after_purity_dPhiCut=0;
 
+	  passed_jet_photon_deltaPhi = false; 		// just to ignore the warning : "may be used uninitialized in this function"
 	  for( int j = 0; j < c->akPu3PF.nref; ++j)
 	  {
 		  jet_photon_deltaR   =   getDR(c->akPu3PF.jteta[j],c->photon.phi[j],
