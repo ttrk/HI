@@ -144,3 +144,45 @@ void test2()
 	TFile* f_ratio=new TFile(Form("~/Desktop/histos/photonCuts_out_all_pt%d_ratio.root", ptCut),"READ");
 	saveAllHistogramsToPicture(f_ratio, "gif", 3, 1);
 }
+
+void testCompare()
+{
+	int ptCut=40;
+	TFile* f1=new TFile(Form("~/Desktop/histos/12032015/photonCuts_out_all_pt%d_run1.root", ptCut),"READ");
+	TFile* f2=new TFile(Form("~/Desktop/histos/12032015/photonCuts_out_all_pt%d_run2.root", ptCut),"READ");
+	TFile* f0=new TFile(Form("~/Desktop/histos/12032015/photonCuts_out_all_pt%d_run0.root", ptCut),"READ");
+
+	TList* histos1=getListOfALLHistograms(f1);
+	TList* histos2=getListOfALLHistograms(f2);
+	TList* histos0=getListOfALLHistograms(f0);
+	int len=histos1->GetEntries();
+
+	TList* histosSum=new TList();
+	TH1D* h_tmp;
+	TH1D* h_tmp1
+	TH1D* h_tmp2;
+	for(int i=0; i<len; i++)
+	{
+		h_tmp1=(TH1D*)histos1->At(i);
+		h_tmp2=(TH1D*)histos2->At(i);
+		h_tmp=new TH1D("h_tmp","addition",h_tmp1->GetNbinsX(),h_tmp1->GetXaxis()->GetXmin(),h_tmp1->GetXaxis()->GetXmax());
+		h_tmp->Add(h_tmp1, h_tmp2, 1, 1);
+		histosSum->Add(h_tmp);
+
+		if(i==0)
+		{
+			TCanvas* c1=new TCanvas();
+			h_tmp->Draw();
+
+			TCanvas* c2=new TCanvas();
+			(TH1D*)histos0->At(i)->Draw();
+
+			TH1D* h_diff=new TH1D("h_diff","subtraction",h_tmp1->GetNbinsX(),h_tmp1->GetXaxis()->GetXmin(),h_tmp1->GetXaxis()->GetXmax());
+			h_diff->Add(h_tmp, (TH1D*)histos0->At(i), 1, -1);
+			TCanvas* c3=new TCanvas();
+			h_diff->Draw();
+		}
+
+		cout<< compareHistograms(h_tmp, (TH1D*)histos0->At(i)) <<endl;
+	}
+}
