@@ -6,6 +6,7 @@ sourceFiles="
 *.C 
 *.h 
 *.cpp
+*.sh
 testDir";         # do not copy all sort of files
 remoteMachine="tatar@cgate.mit.edu";
 destinationInRemote="~/code/HI";

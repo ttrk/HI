@@ -22,7 +22,6 @@ using  std::endl;
 
 void     mergeCuts(TCut cut, TCut* cuts, int len);
 void     mergeCuts(TCut cut, TCut* cuts);
-bool     compareHistograms(TH1* h1, TH1* h2);
 TList*   getListOfALLKeys(TDirectoryFile* dir);
 TList*   getListOfALLKeys(TDirectoryFile* dir, const char* type);
 TList*   getListOfALLHistograms(TDirectoryFile* dir);
@@ -67,23 +66,6 @@ void mergeCuts(TCut cut, TCut* cuts)
 	// http://stackoverflow.com/questions/4108313/how-do-i-find-the-length-of-an-array
 	int len = (sizeof (cuts) / sizeof (*cuts));
 	mergeCuts(cut,cuts,len);
-}
-
-/*
- * compare two histograms bin by bin.
- * */
-bool compareHistograms(TH1* h1, TH1* h2)
-{
-	int numBins=h1->GetNbinsX();
-	if(numBins != h2->GetNbinsX())
-		return false;
-
-	for(int i=0; i<numBins; i++)
-	{
-		if(h1->GetBinContent(i)!=h2->GetBinContent(i))
-			return false;
-	}
-	return true;
 }
 
 TList* getListOfALLKeys(TDirectoryFile* dir)

@@ -652,16 +652,27 @@ void saveAllToImage()
 	}
 }
 
-int main()
+int main(int argc, char **argv)
 {
-//	photonCuts(40,1,"photonCuts_out_all");
-//	photonCuts(40,2,"photonCuts_out_all");
+	if(argc==2)
+	{
+		photonCuts(40,0,argv[1]);
+		photonCuts(40,1,argv[1]);
+		photonCuts(40,2,argv[1]);
 
-	photonCuts(60,1,"photonCuts_out_all");
-	photonCuts(60,2,"photonCuts_out_all");
+		return 0;
+	}
+	else
+	{
+		cout<< "Usage: \photonCuts.exe <output_file_prefix>" <<endl;
+		return 1;
+	}
 
-	photonCuts(80,1,"photonCuts_out_all");
-	photonCuts(80,2,"photonCuts_out_all");
-
-	return 0;
+	//	photonCuts(60,0,"photonCuts_out_all");
+	//	photonCuts(60,1,"photonCuts_out_all");
+	//	photonCuts(60,2,"photonCuts_out_all");
+	//
+	//	photonCuts(80,0,"photonCuts_out_all");
+	//	photonCuts(80,1,"photonCuts_out_all");
+	//	photonCuts(80,2,"photonCuts_out_all");
 }
