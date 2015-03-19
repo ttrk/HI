@@ -1,6 +1,8 @@
 #include <string>
 
 #include "../smallPhotonUtil.h"
+#include "../systemUtils.h"
+
 using  std::string;
 using  std::cout;
 using  std::endl;
@@ -184,5 +186,15 @@ void testCompare()
 		}
 
 		cout<< compareHistograms(h_tmp, (TH1D*)histos0->At(i)) <<endl;
+	}
+}
+
+void test_getFileNames()
+{
+	std::vector<string> fileNames = getFileNames2("/home/kaya/Desktop","pdf");
+
+	for(int i=0; i<fileNames.size(); i++)
+	{
+		cout << fileNames.at(i) << endl;
 	}
 }

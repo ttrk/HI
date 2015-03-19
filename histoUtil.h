@@ -1,12 +1,13 @@
 /*
- * makePlotsUtil.h
+ * histoUtil.h
  *
- *  Created on: Feb 20, 2015
+ *  Created on: Mar 19, 2015
  *      Author: kaya
  */
 
-#ifndef SMALLPHOTONUTIL_H_
-#define SMALLPHOTONUTIL_H_
+#ifndef HISTOUTIL_H_
+#define HISTOUTIL_H_
+
 
 //#include <TCut.h>               // compiling macros give error if this is not included.
 
@@ -44,3 +45,6 @@ bool compareHistograms(TH1* h1, TH1* h2)
 	}
 	return true;
 }
+
+
+#endif /* HISTOUTIL_H_ */

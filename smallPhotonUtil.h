@@ -11,8 +11,6 @@
 #include <TCut.h>               // compiling macros give error if this is not included.
 #include <TDirectoryFile.h>     // compiling macros give error if this is not included.
 #include <TSystem.h>	        // compiling macros give error if this is not included.
-#include <TSystemDirectory.h>	// compiling macros give error if this is not included.
-#include <TSystemFile.h>    	// compiling macros give error if this is not included.
 
 #include <string>
 
@@ -25,9 +23,9 @@ void     mergeCuts(TCut cut, TCut* cuts);
 TList*   getListOfALLKeys(TDirectoryFile* dir);
 TList*   getListOfALLKeys(TDirectoryFile* dir, const char* type);
 TList*   getListOfALLHistograms(TDirectoryFile* dir);
-void     saveAllHistogramsToPicture(TDirectoryFile* dir, const char* fileType, const char* directoryToBeSavedIn, int styleIndex, int rebin);
-void     saveAllHistogramsToPicture(TDirectoryFile* dir, const char* fileType, int dirType, int styleIndex, int rebin);
-void     saveAllCanvasesToPicture(TList* canvases, const char* fileType, const char* directoryToBeSavedIn);
+//void     saveAllHistogramsToPicture(TDirectoryFile* dir, const char* fileType, const char* directoryToBeSavedIn, int styleIndex, int rebin);
+//void     saveAllHistogramsToPicture(TDirectoryFile* dir, const char* fileType, int dirType, int styleIndex, int rebin);
+//void     saveAllCanvasesToPicture(TList* canvases, const char* fileType, const char* directoryToBeSavedIn);
 TList*   divideHistogramList(TList* histoList1, TList* histoList2);
 TList*   divideHistogramList(TDirectoryFile* dir1, TDirectoryFile* dir2);
 Double_t getDR( Double_t eta1, Double_t phi1, Double_t eta2, Double_t phi2);
@@ -201,7 +199,8 @@ void saveAllHistogramsToPicture(TDirectoryFile* dir, const char* fileType="gif",
 		  const char* baseName=sys->BaseName(dir->GetName()); 	//    const char* baseName=basename(f->GetName());	does NOT work
 		  TString dirName(baseName);
 		  dirName.ReplaceAll(".root","");
-		  sys->mkdir(dirName);
+//		  sys->mkdir(dirName);			// does not work. must override "int MakeDirectory(const char* name)"
+		  gSystem->mkdir(dirName,true);
 		  directoryToBeSavedIn=dirName;
 	}
 	else if(dirType==2)
@@ -211,10 +210,11 @@ void saveAllHistogramsToPicture(TDirectoryFile* dir, const char* fileType="gif",
 	}
 	else if(dirType==3)
 	{
-		  TSystem* sys=new TSystem();
+//11		  TSystem* sys=new TSystem();
 		  TString dirName(dir->GetName());
 		  dirName.ReplaceAll(".root","");
-		  sys->mkdir(dirName);
+//11		  sys->mkdir(dirName,true);		// does not work. must override "int MakeDirectory(const char* name)"
+		  gSystem->mkdir(dirName,true);
 		  directoryToBeSavedIn=dirName;
 	}
 
@@ -305,53 +305,6 @@ void saveAllHistogramsToFile(const char* fileName, TList* histos)
 	}
 
 	f->Close();
-}
-
-/*
- * get a list files and folders in the given directory
- * https://root.cern.ch/phpBB3/viewtopic.php?f=3&t=12793
- *
- * default option : all files in the current directory will be returned
- *
- *
- *
- * how to access the result :
- *
-    TObjString* tmpObjStr;
-    TString     tmpStr;
-	for(int i=0; i<list->GetEntries(); i++)
-	{
-		tmpObjStr=(TObjString*)list->At(i);
-		tmpStr   =tmpObjStr->GetString();
-		cout     << tmpStr <<endl;
-	}
- */
-TList* getFileNames(const char *dirname=".", const char *ext="")
-{
-   // ignore errors of Eclipse about TSystem objects
-   TSystemDirectory dir(dirname, dirname);
-   TList* files = dir.GetListOfFiles();
-   TList* outFileNames=new TList();
-   if (files) {
-      TSystemFile *file;
-      // TString cannot be stored in a TCollection... use TObjString instead.
-      // https://root.cern.ch/root/htmldoc/TString.html
-      TObjString* fname;
-      TIter next(files);
-      while ((file=(TSystemFile*)next())) {
-         fname = new TObjString(file->GetName());
-         if (fname->GetString().EndsWith(ext)) {
-//            cout << fname->GetString().Data() << endl;
-            	outFileNames->Add(fname);
-         }
-      }
-   }
-   else
-   {
-	   cout << "no files with given extension found in : " << dirname << endl;
-   }
-
-   return outFileNames;
 }
 
 /*
