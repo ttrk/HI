@@ -23,15 +23,15 @@ void     mergeCuts(TCut cut, TCut* cuts);
 TList*   getListOfALLKeys(TDirectoryFile* dir);
 TList*   getListOfALLKeys(TDirectoryFile* dir, const char* type);
 TList*   getListOfALLHistograms(TDirectoryFile* dir);
-//void     saveAllHistogramsToPicture(TDirectoryFile* dir, const char* fileType, const char* directoryToBeSavedIn, int styleIndex, int rebin);
-//void     saveAllHistogramsToPicture(TDirectoryFile* dir, const char* fileType, int dirType, int styleIndex, int rebin);
-//void     saveAllCanvasesToPicture(TList* canvases, const char* fileType, const char* directoryToBeSavedIn);
-//TList*   divideHistogramList(TList* histoList1, TList* histoList2);
-//TList*   divideHistogramList(TDirectoryFile* dir1, TDirectoryFile* dir2);
+void     saveAllHistogramsToPicture(TDirectoryFile* dir, const char* fileType, const char* directoryToBeSavedIn, int styleIndex, int rebin);
+void     saveAllHistogramsToPicture(TDirectoryFile* dir, const char* fileType, int dirType, int styleIndex, int rebin);
+void     saveAllCanvasesToPicture(TList* canvases, const char* fileType, const char* directoryToBeSavedIn);
+TList*   divideHistogramList(TList* histoList1   , TList* histoList2,    int rebinFactor);
+TList*   divideHistogramList(TDirectoryFile* dir1, TDirectoryFile* dir2, int rebinFactor);
 Double_t getDR( Double_t eta1, Double_t phi1, Double_t eta2, Double_t phi2);
 Double_t getDPHI( Double_t phi1, Double_t phi2);
 Double_t getDETA(Double_t eta1, Double_t eta2);
-//void     saveAllHistogramsToPicture(TDirectoryFile* dir, const char* fileType="gif");		// this line gives error if I use default value option (here const char* fileType="gif") in the function definition.
+void     saveAllHistogramsToPicture(TDirectoryFile* dir, const char* fileType="gif");		// this line gives error if I use default value option (here const char* fileType="gif") in the function definition.
 
 /*
  * merge a set of cuts into a single one. the resulting cut is the cut that satisfies all individual cuts
@@ -244,10 +244,12 @@ void saveAllCanvasesToPicture(TList* canvases, const char* fileType="gif", const
 
 /*
  *  divide histograms element wise
+ *
+ *  "TH1::SetDefaultSumw2()" must have been run before creating the histograms in histoList1 and histoList2
+ *
  */
 TList* divideHistogramList(TList* histoList1, TList* histoList2, int rebinFactor=1)
 {
-//	TH1::SetDefaultSumw2();
 	TList* histos_Division=new TList();
 
 	TH1D*  h1;

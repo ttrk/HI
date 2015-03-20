@@ -152,15 +152,15 @@ const float cut_jet_photon_deltaPhi = (7 * TMath::Pi()) / 8 ;	// 7/8 * TMath::Pi
 
 void photonCuts(float photon_pt_Cut=0, int runHalf_index=0, const char* outFile_prefix="photonCuts_out")
 {
-	const float cut_photon_pt = photon_pt_Cut;	// use different photon pT cuts and then look at the jet pT distributions
+  const float cut_photon_pt = photon_pt_Cut;	// use different photon pT cuts and then look at the jet pT distributions
 	                                            // Draw jet plots after selecting photons > {40,60,80} GeV
-	const int   index_runHalf = runHalf_index;  // 0 : the code runs on all the events.
+  const int   index_runHalf = runHalf_index;  // 0 : the code runs on all the events.
                                                 // 1 : the code runs on the first  half
                                                 // 2 : the code runs on the second half
 
-	cout << "photon_pt_Cut = "  << photon_pt_Cut  <<endl;
-	cout << "runHalf_index = "  << runHalf_index  <<endl;
-	cout << "outFile_prefix = " << outFile_prefix <<endl;
+  cout << "photon_pt_Cut = "  << photon_pt_Cut  <<endl;
+  cout << "runHalf_index = "  << runHalf_index  <<endl;
+  cout << "outFile_prefix = " << outFile_prefix <<endl;
 
   const TString inFile_str="/mnt/hadoop/cms/store/user/luck/2014-photon-forests/pPb_DATA_photon30trig_localJEC_v1.root";
   HiForest *c = new HiForest(inFile_str, "forest", cPPb, false);
@@ -216,98 +216,104 @@ void photonCuts(float photon_pt_Cut=0, int runHalf_index=0, const char* outFile_
 //  TCanvas *c1 = new TCanvas();
 //  c->photonTree->Draw("pt");
 
-  TH1::SetDefaultSumw2();
+  TH1::SetDefaultSumw2();		// to get rid of huge error bars while taking ratio of histograms. must run "TH1::SetDefaultSumw2()" before "creation" of histograms.
 
   // PHOTON histograms
-  Double_t photon_pt_xmin = 20;
-  Double_t photon_pt_xmax  = 210;
-  int 	   photon_pt_Nbins	  = getNumBins(photon_pt_xmin, photon_pt_xmax, 1);
+  Double_t photon_pt_xmin        = 20;
+  Double_t photon_pt_xmax        = 210;
+  int      photon_pt_binsPerUnit = 4;
+  int 	   photon_pt_Nbins	     = getNumBins(photon_pt_xmin, photon_pt_xmax, photon_pt_binsPerUnit);
 
-  Double_t photon_eta_xmin = -2;
-  Double_t photon_eta_xmax  =  2;
+  Double_t photon_eta_xmin  = -cut_eta;
+  Double_t photon_eta_xmax  =  cut_eta;
 //  int photon_eta_Nbins         = getNumBins(photon_eta_xmin, photon_eta_xmax, 25);
-  int photon_eta_Nbins         = 100;
+  int photon_eta_Nbins      = 100;
+
+  int photon_phi_Nbins      = 100;
 
   TH1D *photon_pt_after_eta = new TH1D("photon_pt_after_eta","p_{T}^{#gamma} after |#eta^{#gamma}|<1.44;p_{T}",photon_pt_Nbins , photon_pt_xmin,  photon_pt_xmax);
   TH1D *photon_eta_after_eta = new TH1D("photon_eta_after_eta","#eta^{#gamma} after |#eta^{#gamma}|<1.44;\eta",photon_eta_Nbins, photon_eta_xmin, photon_eta_xmax);
-  TH1D *photon_phi_after_eta = new TH1D("photon_phi_after_eta","#phi^{#gamma} after |#eta^{#gamma}|<1.44;\phi",100, -TMath::Pi(), TMath::Pi());
+  TH1D *photon_phi_after_eta = new TH1D("photon_phi_after_eta","#phi^{#gamma} after |#eta^{#gamma}|<1.44;phi",photon_phi_Nbins, -TMath::Pi(),    TMath::Pi());
 
   TH1D *photon_pt_after_spike_reject = new TH1D("photon_pt_after_spike_reject","p_{T}^{#gamma} after spike rejection cut;p_{T}",photon_pt_Nbins , photon_pt_xmin,  photon_pt_xmax);
   TH1D *photon_eta_after_spike_reject = new TH1D("photon_eta_after_spike_reject","#eta^{#gamma} after spike rejection cut;\eta",photon_eta_Nbins, photon_eta_xmin, photon_eta_xmax);
-  TH1D *photon_phi_after_spike_reject = new TH1D("photon_phi_after_spike_reject","#phi^{#gamma} after spike rejection cut;\phi",100, -TMath::Pi(), TMath::Pi());
+  TH1D *photon_phi_after_spike_reject = new TH1D("photon_phi_after_spike_reject","#phi^{#gamma} after spike rejection cut;phi",photon_phi_Nbins, -TMath::Pi(),    TMath::Pi());
 
   TH1D *photon_pt_after_iso = new TH1D("photon_pt_after_iso","p_{T}^{#gamma} after isolation cut;p_{T}",photon_pt_Nbins , photon_pt_xmin,  photon_pt_xmax);
   TH1D *photon_eta_after_iso = new TH1D("photon_eta_after_iso","#eta^{#gamma} after isolation cut;\eta",photon_eta_Nbins, photon_eta_xmin, photon_eta_xmax);
-  TH1D *photon_phi_after_iso = new TH1D("photon_phi_after_iso","#phi^{#gamma} after isolation cut;\phi",100, -TMath::Pi(), TMath::Pi());
+  TH1D *photon_phi_after_iso = new TH1D("photon_phi_after_iso","#phi^{#gamma} after isolation cut;phi",photon_phi_Nbins, -TMath::Pi(),    TMath::Pi());
 
   TH1D *photon_pt_after_purity = new TH1D("photon_pt_after_purity","p_{T}^{#gamma} after purity enhancement cut;p_{T}",photon_pt_Nbins , photon_pt_xmin,  photon_pt_xmax);
   TH1D *photon_eta_after_purity = new TH1D("photon_eta_after_purity","#eta^{#gamma} after purity enhancement cut;\eta",photon_eta_Nbins, photon_eta_xmin, photon_eta_xmax);
-  TH1D *photon_phi_after_purity = new TH1D("photon_phi_after_purity","#phi^{#gamma} after purity enhancement cut;\phi",100, -TMath::Pi(), TMath::Pi());
+  TH1D *photon_phi_after_purity = new TH1D("photon_phi_after_purity","#phi^{#gamma} after purity enhancement cut;phi",photon_phi_Nbins, -TMath::Pi(),    TMath::Pi());
 
   // JET histograms
-  Double_t jet_pt_xmin   = photon_pt_xmin;
-  Double_t jet_pt_xmax   = photon_pt_xmax;
-  int 	   jet_pt_Nbins	 = getNumBins(jet_pt_xmin, jet_pt_xmax, 1);
+  Double_t jet_pt_xmin        = photon_pt_xmin;
+  Double_t jet_pt_xmax        = photon_pt_xmax;
+  int      jet_pt_binsPerUnit = photon_pt_binsPerUnit;
+  int 	   jet_pt_Nbins	      = getNumBins(jet_pt_xmin, jet_pt_xmax, jet_pt_binsPerUnit);
 
-  Double_t jet_eta_xmin  = -1*(cut_jet_eta+0.0);
-  Double_t jet_eta_xmax  =    (cut_jet_eta+0.0);
+  Double_t jet_eta_xmin  = -1*(cut_jet_eta);
+  Double_t jet_eta_xmax  =    (cut_jet_eta);
 //  int jet_eta_Nbins      = getNumBins(jet_eta_xmin, jet_eta_xmax, 25);
   int jet_eta_Nbins      = 100;
+
+  int jet_phi_Nbins      = 100;
 
   int jet_count_xmax  = 10;
   int jet_count_Nbins = getNumBins(0, jet_count_xmax, 1);
 
-  Double_t jet_photon_DPHI_firstBin=0;
+  Double_t jet_photon_DPHI_xmin=0;
 
   TH1D *jet_pt_after_eta = new TH1D("jet_pt_after_eta","p_{T}^{Jet} after |#eta^{#gamma}|<1.44;p_{T}",jet_pt_Nbins , jet_pt_xmin,  jet_pt_xmax);
   TH1D *jet_eta_after_eta = new TH1D("jet_eta_after_eta","#eta^{Jet} after |#eta^{#gamma}|<1.44;\eta",jet_eta_Nbins, jet_eta_xmin, jet_eta_xmax);
-  TH1D *jet_phi_after_eta = new TH1D("jet_phi_after_eta","#phi^{Jet} after |#eta^{#gamma}|<1.44;\phi",100, -TMath::Pi(), TMath::Pi());
+  TH1D *jet_phi_after_eta = new TH1D("jet_phi_after_eta","#phi^{Jet} after |#eta^{#gamma}|<1.44;phi",jet_phi_Nbins, -TMath::Pi(), TMath::Pi());
   TH1D *jet_count_after_eta = new TH1D("jet_count_after_eta","number of selected jets after |#eta^{#gamma}|<1.44",jet_count_Nbins, 0,jet_count_xmax);
-  TH1D *jet_photon_DPHI_after_eta = new TH1D("jet_photon_DPHI_after_eta","#Delta#phi_{J,#gamma} after |#eta^{#gamma}|<1.44;\phi",100, jet_photon_DPHI_firstBin, TMath::Pi());
+  TH1D *jet_photon_DPHI_after_eta = new TH1D("jet_photon_DPHI_after_eta","#Delta#phi_{J,#gamma} after |#eta^{#gamma}|<1.44;phi",100, jet_photon_DPHI_xmin, TMath::Pi());
 
   TH1D *jet_pt_after_spike_reject = new TH1D("jet_pt_after_spike_reject","p_{T}^{Jet} after spike rejection cut;p_{T}",jet_pt_Nbins , jet_pt_xmin,  jet_pt_xmax);
   TH1D *jet_eta_after_spike_reject = new TH1D("jet_eta_after_spike_reject","#eta^{Jet} after spike rejection cut;\eta",jet_eta_Nbins, jet_eta_xmin, jet_eta_xmax);
-  TH1D *jet_phi_after_spike_reject = new TH1D("jet_phi_after_spike_reject","#phi^{Jet} after spike rejection cut;\phi",100, -TMath::Pi(), TMath::Pi());
+  TH1D *jet_phi_after_spike_reject = new TH1D("jet_phi_after_spike_reject","#phi^{Jet} after spike rejection cut;phi",jet_phi_Nbins, -TMath::Pi(), TMath::Pi());
   TH1D *jet_count_after_spike_reject = new TH1D("jet_count_after_spike_reject","number of selected jets after spike rejection cut",jet_count_Nbins, 0,jet_count_xmax);
-  TH1D *jet_photon_DPHI_after_spike_reject = new TH1D("jet_photon_DPHI_after_spike_reject","#Delta#phi_{J,#gamma} after spike rejection cut;\phi",100, jet_photon_DPHI_firstBin, TMath::Pi());
+  TH1D *jet_photon_DPHI_after_spike_reject = new TH1D("jet_photon_DPHI_after_spike_reject","#Delta#phi_{J,#gamma} after spike rejection cut;phi",100, jet_photon_DPHI_xmin, TMath::Pi());
 
   TH1D *jet_pt_after_iso = new TH1D("jet_pt_after_iso","p_{T}^{Jet} after isolation cut;p_{T}",jet_pt_Nbins , jet_pt_xmin,  jet_pt_xmax);
   TH1D *jet_eta_after_iso = new TH1D("jet_eta_after_iso","#eta^{Jet} after isolation cut;\eta",jet_eta_Nbins, jet_eta_xmin, jet_eta_xmax);
-  TH1D *jet_phi_after_iso = new TH1D("jet_phi_after_iso","#phi^{Jet} after isolation cut;\phi",100, -TMath::Pi(), TMath::Pi());
+  TH1D *jet_phi_after_iso = new TH1D("jet_phi_after_iso","#phi^{Jet} after isolation cut;phi",jet_phi_Nbins, -TMath::Pi(), TMath::Pi());
   TH1D *jet_count_after_iso = new TH1D("jet_count_after_iso","number of selected jets after isolation cut",jet_count_Nbins, 0,jet_count_xmax);
-  TH1D *jet_photon_DPHI_after_iso = new TH1D("jet_photon_DPHI_after_iso","#Delta#phi_{J,#gamma} after isolation cut;\phi",100, jet_photon_DPHI_firstBin, TMath::Pi());
+  TH1D *jet_photon_DPHI_after_iso = new TH1D("jet_photon_DPHI_after_iso","#Delta#phi_{J,#gamma} after isolation cut;phi",100, jet_photon_DPHI_xmin, TMath::Pi());
 
   TH1D *jet_pt_after_purity = new TH1D("jet_pt_after_purity","p_{T}^{Jet} after purity enhancement cut;p_{T}",jet_pt_Nbins , jet_pt_xmin,  jet_pt_xmax);
   TH1D *jet_eta_after_purity = new TH1D("jet_eta_after_purity","#eta^{Jet} after purity enhancement cut;\eta",jet_eta_Nbins, jet_eta_xmin, jet_eta_xmax);
-  TH1D *jet_phi_after_purity = new TH1D("jet_phi_after_purity","#phi^{Jet} after purity enhancement cut;\phi",100, -TMath::Pi(), TMath::Pi());
+  TH1D *jet_phi_after_purity = new TH1D("jet_phi_after_purity","#phi^{Jet} after purity enhancement cut;phi",jet_phi_Nbins, -TMath::Pi(), TMath::Pi());
   TH1D *jet_count_after_purity = new TH1D("jet_count_after_purity","number of selected jets after purity enhancement cut",jet_count_Nbins, 0,jet_count_xmax);
-  TH1D *jet_photon_DPHI_after_purity = new TH1D("jet_photon_DPHI_after_purity","#Delta#phi_{J,#gamma} after purity enhancement cut;\phi",100, jet_photon_DPHI_firstBin, TMath::Pi());
+  TH1D *jet_photon_DPHI_after_purity = new TH1D("jet_photon_DPHI_after_purity","#Delta#phi_{J,#gamma} after purity enhancement cut;phi",100, jet_photon_DPHI_xmin, TMath::Pi());
 
 // JET histograms with deltaPhi > 7/8 * pi
-  Double_t jet_photon_DPHI_dPhiCut_firstBin=2.72;		//(6 * TMath::Pi()) / 8 ;
+  Double_t jet_photon_DPHI_dPhiCut_xmin=cut_jet_photon_deltaPhi;
   TH1D *jet_pt_after_eta_dPhiCut = new TH1D("jet_pt_after_eta_dPhiCut","p_{T}^{Jet} with #Delta#phi_{J,#gamma}>#frac{7}{8}#pi after |#eta^{#gamma}|<1.44;p_{T}",jet_pt_Nbins , jet_pt_xmin,  jet_pt_xmax);
   TH1D *jet_eta_after_eta_dPhiCut = new TH1D("jet_eta_after_eta_dPhiCut","#eta^{Jet} with #Delta#phi_{J,#gamma}>#frac{7}{8}#pi after |#eta^{#gamma}|<1.44;\eta",jet_eta_Nbins, jet_eta_xmin, jet_eta_xmax);
-  TH1D *jet_phi_after_eta_dPhiCut = new TH1D("jet_phi_after_eta_dPhiCut","#phi^{Jet} with #Delta#phi_{J,#gamma}>#frac{7}{8}#pi after |#eta^{#gamma}|<1.44;\phi",100, -TMath::Pi(), TMath::Pi());
+  TH1D *jet_phi_after_eta_dPhiCut = new TH1D("jet_phi_after_eta_dPhiCut","#phi^{Jet} with #Delta#phi_{J,#gamma}>#frac{7}{8}#pi after |#eta^{#gamma}|<1.44;phi",jet_phi_Nbins, -TMath::Pi(), TMath::Pi());
   TH1D *jet_count_after_eta_dPhiCut = new TH1D("jet_count_after_eta_dPhiCut","number of selected jets with #Delta#phi_{J,#gamma}>#frac{7}{8}#pi after |#eta^{#gamma}|<1.44",jet_count_Nbins, 0,jet_count_xmax);
-  TH1D *jet_photon_DPHI_after_eta_dPhiCut = new TH1D("jet_photon_DPHI_after_eta_dPhiCut","#Delta#phi_{J,#gamma} with #Delta#phi_{J,#gamma}>#frac{7}{8}#pi after |#eta^{#gamma}|<1.44;\phi",100, jet_photon_DPHI_dPhiCut_firstBin, TMath::Pi());
+  TH1D *jet_photon_DPHI_after_eta_dPhiCut = new TH1D("jet_photon_DPHI_after_eta_dPhiCut","#Delta#phi_{J,#gamma} with #Delta#phi_{J,#gamma}>#frac{7}{8}#pi after |#eta^{#gamma}|<1.44;phi",100, jet_photon_DPHI_dPhiCut_xmin, TMath::Pi());
 
   TH1D *jet_pt_after_spike_reject_dPhiCut = new TH1D("jet_pt_after_spike_reject_dPhiCut","p_{T}^{Jet} with #Delta#phi_{J,#gamma}>#frac{7}{8}#pi after spike rejection cut;p_{T}",jet_pt_Nbins , jet_pt_xmin,  jet_pt_xmax);
   TH1D *jet_eta_after_spike_reject_dPhiCut = new TH1D("jet_eta_after_spike_reject_dPhiCut","#eta^{Jet} with #Delta#phi_{J,#gamma}>#frac{7}{8}#pi after spike rejection cut;\eta",jet_eta_Nbins, jet_eta_xmin, jet_eta_xmax);
-  TH1D *jet_phi_after_spike_reject_dPhiCut = new TH1D("jet_phi_after_spike_reject_dPhiCut","#phi^{Jet} with #Delta#phi_{J,#gamma}>#frac{7}{8}#pi after spike rejection cut;\phi",100, -TMath::Pi(), TMath::Pi());
+  TH1D *jet_phi_after_spike_reject_dPhiCut = new TH1D("jet_phi_after_spike_reject_dPhiCut","#phi^{Jet} with #Delta#phi_{J,#gamma}>#frac{7}{8}#pi after spike rejection cut;phi",jet_phi_Nbins, -TMath::Pi(), TMath::Pi());
   TH1D *jet_count_after_spike_reject_dPhiCut = new TH1D("jet_count_after_spike_reject_dPhiCut","number of selected jets with #Delta#phi_{J,#gamma}>#frac{7}{8}#pi after spike rejection cut",jet_count_Nbins, 0,jet_count_xmax);
-  TH1D *jet_photon_DPHI_after_spike_reject_dPhiCut = new TH1D("jet_photon_DPHI_after_spike_reject_dPhiCut","#Delta#phi_{J,#gamma} with #Delta#phi_{J,#gamma}>#frac{7}{8}#pi after spike rejection cut;\phi",100, jet_photon_DPHI_dPhiCut_firstBin, TMath::Pi());
+  TH1D *jet_photon_DPHI_after_spike_reject_dPhiCut = new TH1D("jet_photon_DPHI_after_spike_reject_dPhiCut","#Delta#phi_{J,#gamma} with #Delta#phi_{J,#gamma}>#frac{7}{8}#pi after spike rejection cut;phi",100, jet_photon_DPHI_dPhiCut_xmin, TMath::Pi());
 
   TH1D *jet_pt_after_iso_dPhiCut = new TH1D("jet_pt_after_iso_dPhiCut","p_{T}^{Jet} with #Delta#phi_{J,#gamma}>#frac{7}{8}#pi after isolation cut;p_{T}",jet_pt_Nbins , jet_pt_xmin,  jet_pt_xmax);
   TH1D *jet_eta_after_iso_dPhiCut = new TH1D("jet_eta_after_iso_dPhiCut","#eta^{Jet} with #Delta#phi_{J,#gamma}>#frac{7}{8}#pi after isolation cut;\eta",jet_eta_Nbins, jet_eta_xmin, jet_eta_xmax);
-  TH1D *jet_phi_after_iso_dPhiCut = new TH1D("jet_phi_after_iso_dPhiCut","#phi^{Jet} with #Delta#phi_{J,#gamma}>#frac{7}{8}#pi after isolation cut;\phi",100, -TMath::Pi(), TMath::Pi());
+  TH1D *jet_phi_after_iso_dPhiCut = new TH1D("jet_phi_after_iso_dPhiCut","#phi^{Jet} with #Delta#phi_{J,#gamma}>#frac{7}{8}#pi after isolation cut;phi",jet_phi_Nbins, -TMath::Pi(), TMath::Pi());
   TH1D *jet_count_after_iso_dPhiCut = new TH1D("jet_count_after_iso_dPhiCut","number of selected jets with #Delta#phi_{J,#gamma}>#frac{7}{8}#pi after isolation cut",jet_count_Nbins, 0,jet_count_xmax);
-  TH1D *jet_photon_DPHI_after_iso_dPhiCut = new TH1D("jet_photon_DPHI_after_iso_dPhiCut","#Delta#phi_{J,#gamma} with #Delta#phi_{J,#gamma}>#frac{7}{8}#pi after isolation cut;\phi",100, jet_photon_DPHI_dPhiCut_firstBin, TMath::Pi());
+  TH1D *jet_photon_DPHI_after_iso_dPhiCut = new TH1D("jet_photon_DPHI_after_iso_dPhiCut","#Delta#phi_{J,#gamma} with #Delta#phi_{J,#gamma}>#frac{7}{8}#pi after isolation cut;phi",100, jet_photon_DPHI_dPhiCut_xmin, TMath::Pi());
 
   TH1D *jet_pt_after_purity_dPhiCut = new TH1D("jet_pt_after_purity_dPhiCut","p_{T}^{Jet} with #Delta#phi_{J,#gamma}>#frac{7}{8}#pi after purity enhancement cut;p_{T}",jet_pt_Nbins , jet_pt_xmin,  jet_pt_xmax);
   TH1D *jet_eta_after_purity_dPhiCut = new TH1D("jet_eta_after_purity_dPhiCut","#eta^{Jet} with #Delta#phi_{J,#gamma}>#frac{7}{8}#pi after purity enhancement cut;\eta",jet_eta_Nbins, jet_eta_xmin, jet_eta_xmax);
-  TH1D *jet_phi_after_purity_dPhiCut = new TH1D("jet_phi_after_purity_dPhiCut","#phi^{Jet} with #Delta#phi_{J,#gamma}>#frac{7}{8}#pi after purity enhancement cut;\phi",100, -TMath::Pi(), TMath::Pi());
+  TH1D *jet_phi_after_purity_dPhiCut = new TH1D("jet_phi_after_purity_dPhiCut","#phi^{Jet} with #Delta#phi_{J,#gamma}>#frac{7}{8}#pi after purity enhancement cut;phi",jet_phi_Nbins, -TMath::Pi(), TMath::Pi());
   TH1D *jet_count_after_purity_dPhiCut = new TH1D("jet_count_after_purity_dPhiCut","number of selected jets with #Delta#phi_{J,#gamma}>#frac{7}{8}#pi after purity enhancement cut",jet_count_Nbins, 0,jet_count_xmax);
-  TH1D *jet_photon_DPHI_after_purity_dPhiCut = new TH1D("jet_photon_DPHI_after_purity_dPhiCut","#Delta#phi_{J,#gamma} with #Delta#phi_{J,#gamma}>#frac{7}{8}#pi after purity enhancement cut;\phi",100, jet_photon_DPHI_dPhiCut_firstBin, TMath::Pi());
+  TH1D *jet_photon_DPHI_after_purity_dPhiCut = new TH1D("jet_photon_DPHI_after_purity_dPhiCut","#Delta#phi_{J,#gamma} with #Delta#phi_{J,#gamma}>#frac{7}{8}#pi after purity enhancement cut;phi",100, jet_photon_DPHI_dPhiCut_xmin, TMath::Pi());
 
   Long64_t entries = c->photonTree->GetEntries();
 //    Long64_t entries = 10000;	// work with a smaller set to get faster results
@@ -686,7 +692,7 @@ void saveAllToImage2()
 	vector<string> fileNames = getFileNames2(dirName,"root");
 
 	TFile* f;
-	for(int i=0; i< fileNames.size(); i++)
+	for(int i=0; i < (int)fileNames.size(); i++)
 	{
 		f=new TFile(Form("%s/%s",dirName,fileNames.at(i).c_str()),"READ");
 		saveAllHistogramsToPicture(f,"gif",3);
@@ -713,7 +719,7 @@ int main(int argc, char **argv)
 	}
 	else
 	{
-		cout<< "Usage: \photonCuts.exe <output_file_prefix>" <<endl;
+		cout<< "Usage: ./photonCuts.exe <output_file_prefix>" <<endl;
 		return 1;
 	}
 

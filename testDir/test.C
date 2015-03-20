@@ -71,6 +71,8 @@ void plotSame()
 			  xcoroff=0.2;
 			  ycoroff=0.3;
 
+//			  h1->GetYaxis()->SetRangeUser(0, c1->GetY2());
+
 			  TLegend* leg = new TLegend(xcor1,ycor1,xcor1+xcoroff,ycor1+xcoroff);
 			  leg->AddEntry(h1, "p_{T}^{#gamma}>40");
 			  leg->AddEntry(h2, "p_{T}^{#gamma}>60");

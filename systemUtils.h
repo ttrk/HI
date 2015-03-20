@@ -18,8 +18,8 @@ using  std::string;
 using  std::cout;
 using  std::endl;
 
-//TList*              getFileNames (const char *dirname=".", const char *ext="");
-//std::vector<string> getFileNames2(const char *dirname=".", const char *ext="");
+TList*              getFileNames (const char* dirname, const char* ext);
+std::vector<string> getFileNames2(const char* dirname, const char* ext);
 
 /*
  * get a list files and folders in the given directory
