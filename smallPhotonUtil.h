@@ -1,10 +1,3 @@
-/*
- * makePlotsUtil.h
- *
- *  Created on: Feb 20, 2015
- *      Author: kaya
- */
-
 #ifndef SMALLPHOTONUTIL_H_
 #define SMALLPHOTONUTIL_H_
 
@@ -20,18 +13,19 @@ using  std::endl;
 
 void     mergeCuts(TCut cut, TCut* cuts, int len);
 void     mergeCuts(TCut cut, TCut* cuts);
-TList*   getListOfALLKeys(TDirectoryFile* dir);
-TList*   getListOfALLKeys(TDirectoryFile* dir, const char* type);
+TList*   getListOfSOMEKeys(TDirectoryFile* dir, const char* pattern);
+TList*   getListOfSOMEKeys(TDirectoryFile* dir, const char* pattern, const char* type);
+TList*   getListOfALLKeys (TDirectoryFile* dir);
+TList*   getListOfALLKeys (TDirectoryFile* dir, const char* type);
+TList*   getListOfHistograms   (TDirectoryFile* dir, const char* pattern);
 TList*   getListOfALLHistograms(TDirectoryFile* dir);
 void     saveAllHistogramsToPicture(TDirectoryFile* dir, const char* fileType, const char* directoryToBeSavedIn, int styleIndex, int rebin);
 void     saveAllHistogramsToPicture(TDirectoryFile* dir, const char* fileType, int dirType, int styleIndex, int rebin);
 void     saveAllCanvasesToPicture(TList* canvases, const char* fileType, const char* directoryToBeSavedIn);
-TList*   divideHistogramList(TList* histoList1   , TList* histoList2,    int rebinFactor);
-TList*   divideHistogramList(TDirectoryFile* dir1, TDirectoryFile* dir2, int rebinFactor);
 Double_t getDR( Double_t eta1, Double_t phi1, Double_t eta2, Double_t phi2);
 Double_t getDPHI( Double_t phi1, Double_t phi2);
 Double_t getDETA(Double_t eta1, Double_t eta2);
-void     saveAllHistogramsToPicture(TDirectoryFile* dir, const char* fileType="gif");		// this line gives error if I use default value option (here const char* fileType="gif") in the function definition.
+//void     saveAllHistogramsToPicture(TDirectoryFile* dir, const char* fileType="gif");		// this line gives error if I use default value option (here const char* fileType="gif") in the function definition.
 
 /*
  * merge a set of cuts into a single one. the resulting cut is the cut that satisfies all individual cuts
@@ -66,9 +60,76 @@ void mergeCuts(TCut cut, TCut* cuts)
 	mergeCuts(cut,cuts,len);
 }
 
+
+/*
+ * get list of all keys under a directory "dir" whose name contains "pattern"
+ */
+TList* getListOfSOMEKeys(TDirectoryFile* dir, const char* pattern="")
+{
+	TList* keysInDir = dir->GetListOfKeys();
+	TIter* iter = new TIter(keysInDir);
+
+	TDirectoryFile *subdir;
+	TKey*  key;
+	TList* keys=new TList();
+	TList* newKeys=new TList();
+	TString keyName;
+
+	while ((key=(TKey*)iter->Next())) {
+
+		keyName=key->GetName();
+		if(keyName.Contains(pattern))
+		{
+			keys->Add(key);
+		}
+
+		// traverse directories in a DFS manner (recursively)
+		if(key->IsFolder())
+		{
+			subdir=(TDirectoryFile*)key->ReadObj();
+			newKeys=getListOfSOMEKeys(subdir, pattern);
+			keys->AddAll(newKeys);
+		}
+	}
+	return keys;
+}
+
+
+/*
+ * get list of all keys under a directory "dir" for objects of a given "type" and whose name contains "pattern"
+ */
+TList* getListOfSOMEKeys(TDirectoryFile* dir, const char* pattern="", const char* type="")
+{
+	TList* keysInDir = dir->GetListOfKeys();
+	TIter* iter = new TIter(keysInDir);
+
+	TDirectoryFile *subdir;
+	TKey*  key;
+	TList* keys=new TList();
+	TList* newKeys=new TList();
+	TString keyName;
+
+	while ((key=(TKey*)iter->Next())) {
+
+		keyName=key->GetName();
+		if(keyName.Contains(pattern) && strcmp(key->GetClassName(), type) == 0)
+		{
+			keys->Add(key);
+		}
+
+		// traverse directories in a DFS manner (recursively)
+		if(key->IsFolder())
+		{
+			subdir=(TDirectoryFile*)key->ReadObj();
+			newKeys=getListOfSOMEKeys(subdir, pattern, type);
+			keys->AddAll(newKeys);
+		}
+	}
+	return keys;
+}
+
 TList* getListOfALLKeys(TDirectoryFile* dir)
 {
-
 	TList* keysInDir = dir->GetListOfKeys();
 	TIter* iter = new TIter(keysInDir);
 
@@ -97,21 +158,52 @@ TList* getListOfALLKeys(TDirectoryFile* dir)
  */
 TList* getListOfALLKeys(TDirectoryFile* dir, const char* type)
 {
-	TList* keysOfType=new TList();
-	TList* keysALL = getListOfALLKeys(dir);
 
-	TIter* iter = new TIter(keysALL);
+	TList* keysInDir = dir->GetListOfKeys();
+	TIter* iter = new TIter(keysInDir);
+
+	TDirectoryFile *subdir;
 	TKey*  key;
-	while ((key=(TKey*)iter->Next()))
-	{
-//		http://www.cplusplus.com/reference/cstring/strcmp/
+	TList* keysOfType=new TList();
+	TList *newKeys=new TList();
+
+	while ((key=(TKey*)iter->Next())) {
+
+		//		http://www.cplusplus.com/reference/cstring/strcmp/
 		if(strcmp(key->GetClassName(), type) == 0)
 		{
 			keysOfType->Add(key);
 		}
+
+		// traverse directories in a DFS manner (recursively)
+		if(key->IsFolder())
+		{
+			subdir=(TDirectoryFile*)key->ReadObj();
+			newKeys=getListOfALLKeys(subdir, type);
+			keysOfType->AddAll(newKeys);
+		}
 	}
 
 	return keysOfType;
+}
+
+/*
+ * get list of histograms under a directory "dir" for objects of a given "type"
+ * the name of the histograms should contain the pattern
+ */
+TList* getListOfHistograms(TDirectoryFile* dir, const char* pattern="")
+{
+	TList* histos=new TList();
+	TList* keysHisto = getListOfSOMEKeys(dir, pattern, "TH1D");
+
+	TIter* iter = new TIter(keysHisto);
+	TKey*  key;
+	while ((key=(TKey*)iter->Next()))
+	{
+		histos->Add((TH1D*)key->ReadObj());
+	}
+
+	return histos;
 }
 
 /*
@@ -240,77 +332,6 @@ void saveAllCanvasesToPicture(TList* canvases, const char* fileType="gif", const
 		}
 	}
 //	c->Close();
-}
-
-/*
- *  divide histograms element wise
- *
- *  "TH1::SetDefaultSumw2()" must have been run before creating the histograms in histoList1 and histoList2
- *
- */
-TList* divideHistogramList(TList* histoList1, TList* histoList2, int rebinFactor=1)
-{
-	TList* histos_Division=new TList();
-
-	TH1D*  h1;
-	TH1D*  h2;
-	TH1D*  h_division;
-	for(int i=0; i<histoList1->GetEntries(); i++)
-	{
-		h1=(TH1D*)histoList1->At(i);
-		h2=(TH1D*)histoList2->At(i);
-
-//		cout<<h1->GetNbinsX()<<endl;
-//		cout<<h2->GetNbinsX()<<endl;
-
-		if (rebinFactor != 1)
-		{
-			h1->Rebin(rebinFactor);
-			h2->Rebin(rebinFactor);
-		}
-
-		h1->Scale(1/(h1->GetEntries()));
-		h2->Scale(1/(h2->GetEntries()));
-
-//		cout<<h1->GetNbinsX()<<endl;
-//		cout<<h2->GetNbinsX()<<endl;
-
-		h_division=(TH1D*)h1->Clone(h1->GetName());
-//		h_division=new TH1D(h1->GetName(),h1->GetTitle(),h1->GetNbinsX(),h1->GetXaxis()->GetXmin(),h1->GetXaxis()->GetXmax());
-//		h_division=new TH1D();
-		h_division->Divide(h1,h2);
-		h_division->SetName(Form("%s_ratio",h1->GetName()));
-		h_division->SetTitle(Form("ratio of %s",h1->GetTitle()));
-
-		histos_Division->Add(h_division);
-	}
-
-	return histos_Division;
-}
-
-/*
- *  divide histograms from 2 directories element wise
- */
-TList* divideHistogramList(TDirectoryFile* dir1, TDirectoryFile* dir2, int rebinFactor = 1)
-{
-	TList* histoList1=getListOfALLHistograms(dir1);
-	TList* histoList2=getListOfALLHistograms(dir2);
-
-	return divideHistogramList(histoList1, histoList2, rebinFactor);
-}
-
-void saveAllHistogramsToFile(const char* fileName, TList* histos)
-{
-	TFile* f=new TFile(fileName, "RECREATE");
-
-	TH1D* h;
-	TIter* iter = new TIter(histos);
-	while ((h=(TH1D*)iter->Next()))
-	{
-		h->Write();
-	}
-
-	f->Close();
 }
 
 /*
