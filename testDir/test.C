@@ -11,160 +11,6 @@ using  std::endl;
 
 const char *type1 = "TDirectoryFile";
 
-void plotSameRatio()
-{
-	  const char* dirName="/home/kaya/Documents/cgate/output/out_HI/20032015";
-
-	  TList* histos_pt40=getListOfALLHistograms(new TFile(Form("%s/photonCuts_20032015_pt40_ratio.root",dirName),"READ"));
-	  TList* histos_pt60=getListOfALLHistograms(new TFile(Form("%s/photonCuts_20032015_pt60_ratio.root",dirName),"READ"));
-	  TList* histos_pt80=getListOfALLHistograms(new TFile(Form("%s/photonCuts_20032015_pt80_ratio.root",dirName),"READ"));
-
-	  TList* canvases=new TList();
-
-	  TH1D* h1;
-	  TH1D* h2;
-	  TH1D* h3;
-	  TCanvas* c1=new TCanvas("c1");	// must be here
-
-	  double xcor1;
-	  double ycor1;
-	  double xcoroff;
-	  double ycoroff;
-
-	  int rebinFactor = 2;
-	  for(int i=0; i<histos_pt40->GetEntries(); i++)
-	  {
-			  h1=(TH1D*)histos_pt40->At(i);
-			  h2=(TH1D*)histos_pt60->At(i);
-			  h3=(TH1D*)histos_pt80->At(i);
-
-			  if(rebinFactor != 1)
-			  {
-				  h1->Rebin(rebinFactor);
-				  h2->Rebin(rebinFactor);
-				  h3->Rebin(rebinFactor);
-			  }
-
-	//		  h1->SetAxisRange(20,200);
-	//		  h1->SetBins(20,h1->GetXaxis()->GetXmin(),h1->GetXaxis()->GetXmax());
-	//		  h2->SetBins(20,h2->GetXaxis()->GetXmin(),h2->GetXaxis()->GetXmax());
-	//		  h3->SetBins(20,h3->GetXaxis()->GetXmin(),h3->GetXaxis()->GetXmax());
-
-	/*		  cout<<"-----------"<<endl;
-			  cout<<h1->GetNbinsX()<<endl;
-			  cout<<h1->GetXaxis()->GetXmin()<<endl;
-			  cout<<h1->GetXaxis()->GetXmax()<<endl;*/
-
-			  h1->Draw("e0");
-			  h2->Draw("e0same");
-			  h3->Draw("e0same");
-
-			  h1->SetLineWidth(2);
-			  h2->SetLineWidth(2);
-			  h3->SetLineWidth(2);
-
-			  h2->SetLineColor(kRed);
-			  h3->SetLineColor(kGreen);
-
-			  xcor1=0.8;
-			  ycor1=0.55;
-			  xcoroff=0.2;
-			  ycoroff=0.3;
-
-//			  h1->GetYaxis()->SetRangeUser(.0001, h3->GetMaximum());
-
-			  TLegend* leg = new TLegend(xcor1,ycor1,xcor1+xcoroff,ycor1+xcoroff);
-			  leg->AddEntry(h1, "p_{T}^{#gamma}>40");
-			  leg->AddEntry(h2, "p_{T}^{#gamma}>60");
-			  leg->AddEntry(h3, "p_{T}^{#gamma}>80");
-			  leg->SetHeader("different p_{T}^{#gamma} cuts");
-			  leg->Draw();
-
-			  c1->SetLogy();		// some curves may not appear in linear scale
-			  c1->SetName(h1->GetName());
-
-			  c1->SaveAs(Form("%s/drawsameAllRatio2/%s.pdf",dirName ,c1->GetName()));
-	  }
-	  c1->Close();
-}
-
-void plotSame()
-{
-	  const char* dirName="/home/kaya/Documents/cgate/output/out_HI/20032015";
-
-	  TList* histos_pt40=getListOfALLHistograms(new TFile(Form("%s/photonCuts_20032015_pt40_run0.root",dirName),"READ"));
-	  TList* histos_pt60=getListOfALLHistograms(new TFile(Form("%s/photonCuts_20032015_pt60_run0.root",dirName),"READ"));
-	  TList* histos_pt80=getListOfALLHistograms(new TFile(Form("%s/photonCuts_20032015_pt80_run0.root",dirName),"READ"));
-
-	  TList* canvases=new TList();
-
-	  TH1D* h1;
-	  TH1D* h2;
-	  TH1D* h3;
-	  TCanvas* c1=new TCanvas("c1");	// must be here
-
-	  double xcor1;
-	  double ycor1;
-	  double xcoroff;
-	  double ycoroff;
-
-	  int rebinFactor = 4;
-	  for(int i=0; i<histos_pt40->GetEntries(); i++)
-	  {
-			  h1=(TH1D*)histos_pt40->At(i);
-			  h2=(TH1D*)histos_pt60->At(i);
-			  h3=(TH1D*)histos_pt80->At(i);
-
-			  if(rebinFactor != 1)
-			  {
-				  h1->Rebin(rebinFactor);
-				  h2->Rebin(rebinFactor);
-				  h3->Rebin(rebinFactor);
-			  }
-
-	//		  h1->SetAxisRange(20,200);
-	//		  h1->SetBins(20,h1->GetXaxis()->GetXmin(),h1->GetXaxis()->GetXmax());
-	//		  h2->SetBins(20,h2->GetXaxis()->GetXmin(),h2->GetXaxis()->GetXmax());
-	//		  h3->SetBins(20,h3->GetXaxis()->GetXmin(),h3->GetXaxis()->GetXmax());
-
-	/*		  cout<<"-----------"<<endl;
-			  cout<<h1->GetNbinsX()<<endl;
-			  cout<<h1->GetXaxis()->GetXmin()<<endl;
-			  cout<<h1->GetXaxis()->GetXmax()<<endl;*/
-
-			  h1->Draw("hist");
-			  h2->Draw("histsame");
-			  h3->Draw("histsame");
-
-			  h1->SetLineWidth(2);
-			  h2->SetLineWidth(2);
-			  h3->SetLineWidth(2);
-
-			  h2->SetLineColor(kRed);
-			  h3->SetLineColor(kGreen);
-
-			  xcor1=0.8;
-			  ycor1=0.55;
-			  xcoroff=0.2;
-			  ycoroff=0.3;
-
-//			  h1->GetYaxis()->SetRangeUser(0, c1->GetY2());
-
-			  TLegend* leg = new TLegend(xcor1,ycor1,xcor1+xcoroff,ycor1+xcoroff);
-			  leg->AddEntry(h1, "p_{T}^{#gamma}>40");
-			  leg->AddEntry(h2, "p_{T}^{#gamma}>60");
-			  leg->AddEntry(h3, "p_{T}^{#gamma}>80");
-			  leg->SetHeader("different p_{T}^{#gamma} cuts");
-			  leg->Draw();
-
-//			  c1->SetLogy();		// some curves may not appear in linear scale
-			  c1->SetName(h1->GetName());
-
-			  c1->SaveAs(Form("%s/drawsameAll4/%s.gif",dirName ,c1->GetName()));
-	  }
-	  c1->Close();
-}
-
 void test()
 {
   TList* histos_pt40=getListOfALLHistograms(new TFile("~/Desktop/histos/photonCuts_out_all_pt40_run0.root","READ"));
@@ -301,6 +147,18 @@ void test2()
 
 	TFile* f_ratio=new TFile(Form("~/Desktop/histos/photonCuts_out_all_pt%d_ratio.root", ptCut),"READ");
 	saveAllHistogramsToPicture(f_ratio, "gif", 3, 1);
+}
+
+void test_getListOfSOMEKeys()
+{
+	  const char* dirName="/home/kaya/Documents/cgate/output/out_HI/20032015";
+	  TFile* file1 = new TFile(Form("%s/photonCuts_20032015_pt40_run0.root",dirName),"READ");
+
+	  TList* histos_pt40 = getListOfHistograms(file1, "spike");
+	  for (int i=0; i<histos_pt40->GetEntries() ; i++)
+	  {
+		  cout << histos_pt40->At(i)->GetName() <<endl;
+	  }
 }
 
 void testCompare()

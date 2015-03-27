@@ -1,8 +1,5 @@
-#include "../HiForestAnalysis/hiForest.h"
 #include <TFile.h>
 #include <TTree.h>
-#include <TCanvas.h>
-#include <TH1D.h>
 #include <TString.h>
 #include <TCut.h>
 #include <TKey.h>
@@ -10,9 +7,8 @@
 #include <iostream>
 #include <map>
 
+#include "../HiForestAnalysis/hiForest.h"
 #include "smallPhotonUtil.h"
-#include "histoUtil.h"
-#include "systemUtils.h"
 
 // necessary for GCC C++ Compiler to work
 #include <string>
@@ -652,51 +648,6 @@ void photonCuts(float photon_pt_Cut=0, int runHalf_index=0, const char* outFile_
 
   c->inf->Close();
   outFile->Close();
-}
-
-void produceRatioHistograms(const char* pt="40")
-{
-	const char* dirName="/home/kaya/Documents/cgate/output/out_HI/19032015";
-
-	TFile* f1=new TFile(Form("%s/photonCuts_19032015_pt%s_run1.root",dirName,pt), "READ");
-	TFile* f2=new TFile(Form("%s/photonCuts_19032015_pt%s_run2.root",dirName,pt), "READ");
-	TList* histos_Ratio = divideHistogramList(f1,f2);
-
-	const char* outFile_str = Form("%s/photonCuts_19032015_pt%s_ratio.root", dirName, pt);
-	saveAllHistogramsToFile(outFile_str, histos_Ratio);
-
-	saveAllHistogramsToPicture(new TFile(outFile_str,"READ"),"gif",3,1);
-}
-
-void saveAllToImage()
-{
-	const char* dirName="/home/kaya/Documents/cgate/output/out_HI/16032015";
-
-	const char* fileNames[] = {"photonCuts_16032015_pt80_run0.root",
-							   "photonCuts_16032015_pt80_run1.root",
-							   "photonCuts_16032015_pt80_run2.root"};
-
-	int len_fileNames=(sizeof (fileNames) / sizeof (*fileNames));
-	TFile* f;
-	for(int i=0; i<len_fileNames; i++)
-	{
-		f=new TFile(Form("%s/%s",dirName,fileNames[i]),"READ");
-		saveAllHistogramsToPicture(f,"gif",3);
-	}
-}
-
-void saveAllToImage2()
-{
-	const char* dirName="/home/kaya/Documents/cgate/output/out_HI/19032015";
-
-	vector<string> fileNames = getFileNames2(dirName,"root");
-
-	TFile* f;
-	for(int i=0; i < (int)fileNames.size(); i++)
-	{
-		f=new TFile(Form("%s/%s",dirName,fileNames.at(i).c_str()),"READ");
-		saveAllHistogramsToPicture(f,"gif",3);
-	}
 }
 
 int main(int argc, char **argv)
