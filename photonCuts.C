@@ -9,7 +9,10 @@
 
 #include "../HiForestAnalysis/hiForest.h"
 #include "smallPhotonUtil.h"
+<<<<<<< HEAD
 #include "histoUtil.h"
+=======
+>>>>>>> 4f3535066a8a6f87f93d5757a2d269cefd6482d8
 
 // necessary for GCC C++ Compiler to work
 #include <string>
