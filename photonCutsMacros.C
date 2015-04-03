@@ -260,7 +260,7 @@ void saveAllToImage()
 
 void saveAllToImage2()
 {
-	const char* dirName="/home/kaya/Documents/cgate/output/out_HI/19032015";
+	const char* dirName="/home/kaya/Documents/cgate/output/out_HI/03042015";
 
 	vector<string> fileNames = getFileNames2(dirName,"root");
 

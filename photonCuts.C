@@ -9,10 +9,7 @@
 
 #include "../HiForestAnalysis/hiForest.h"
 #include "smallPhotonUtil.h"
-<<<<<<< HEAD
 #include "histoUtil.h"
-=======
->>>>>>> 4f3535066a8a6f87f93d5757a2d269cefd6482d8
 
 // necessary for GCC C++ Compiler to work
 #include <string>
@@ -162,8 +159,10 @@ void photonCuts(float photon_pt_Cut=0, int runHalf_index=0, const char* outFile_
   cout << "runHalf_index = "  << runHalf_index  <<endl;
   cout << "outFile_prefix = " << outFile_prefix <<endl;
 
-  const TString inFile_str="/mnt/hadoop/cms/store/user/luck/2014-photon-forests/pPb_DATA_photon30trig_localJEC_v1.root";
+//  const TString inFile_str="/mnt/hadoop/cms/store/user/luck/2014-photon-forests/pPb_DATA_photon30trig_localJEC_v1.root";
+  const TString inFile_str="/mnt/hadoop/cms/store/user/luck/2014-photon-forests/pPb_DATA_photon30trig_localJEC_v2.root";
   HiForest *c = new HiForest(inFile_str, "forest", cPPb, false);
+  cout << "inFile_str = " << inFile_str <<endl;
 
   c->LoadNoTrees();
   c->hasPhotonTree = true;
@@ -191,6 +190,7 @@ void photonCuts(float photon_pt_Cut=0, int runHalf_index=0, const char* outFile_
 
   const TString outFile_str=Form("%s_pt%d_run%d.root", outFile_prefix,(int)cut_photon_pt, index_runHalf);
   TFile *outFile = new TFile(outFile_str,"RECREATE");
+  cout << "outFile_str = " << outFile_str << endl;
 
   int count_after_eta=0;			// number of events which pass the eta cut, ie. events where there is a photon that passes eta cut
   int count_after_spike_reject=0;	// number of events whose leading photon after the eta cut passes spike rejection cut
@@ -221,15 +221,15 @@ void photonCuts(float photon_pt_Cut=0, int runHalf_index=0, const char* outFile_
   // PHOTON histograms
   Double_t photon_pt_xmin        = 20;
   Double_t photon_pt_xmax        = 210;
-  int      photon_pt_binsPerUnit = 4;
+  int      photon_pt_binsPerUnit = 16;
   int 	   photon_pt_Nbins	     = getNumBins(photon_pt_xmin, photon_pt_xmax, photon_pt_binsPerUnit);
 
   Double_t photon_eta_xmin  = -cut_eta;
   Double_t photon_eta_xmax  =  cut_eta;
 //  int photon_eta_Nbins         = getNumBins(photon_eta_xmin, photon_eta_xmax, 25);
-  int photon_eta_Nbins      = 100;
+  int photon_eta_Nbins      = 400;
 
-  int photon_phi_Nbins      = 100;
+  int photon_phi_Nbins      = 400;
 
   TH1D *photon_pt_after_eta = new TH1D("photon_pt_after_eta","p_{T}^{#gamma} after |#eta^{#gamma}|<1.44;p_{T}",photon_pt_Nbins , photon_pt_xmin,  photon_pt_xmax);
   TH1D *photon_eta_after_eta = new TH1D("photon_eta_after_eta","#eta^{#gamma} after |#eta^{#gamma}|<1.44;\eta",photon_eta_Nbins, photon_eta_xmin, photon_eta_xmax);
@@ -256,9 +256,9 @@ void photonCuts(float photon_pt_Cut=0, int runHalf_index=0, const char* outFile_
   Double_t jet_eta_xmin  = -1*(cut_jet_eta);
   Double_t jet_eta_xmax  =    (cut_jet_eta);
 //  int jet_eta_Nbins      = getNumBins(jet_eta_xmin, jet_eta_xmax, 25);
-  int jet_eta_Nbins      = 100;
+  int jet_eta_Nbins      = photon_eta_Nbins;	// warning : jet_eta and photon_eta do not have the same range
 
-  int jet_phi_Nbins      = 100;
+  int jet_phi_Nbins      = photon_phi_Nbins;
 
   int jet_count_xmax  = 10;
   int jet_count_Nbins = getNumBins(0, jet_count_xmax, 1);

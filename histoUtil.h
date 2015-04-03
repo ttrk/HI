@@ -11,11 +11,11 @@
 
 //#include <TCut.h>               // compiling macros give error if this is not included.
 
-int      getNumBins(double xmin, double xmax, int numBinsPerUnitX);
-bool     compareHistograms(TH1* h1, TH1* h2);
-TList*   divideHistogramList(TList* histoList1   , TList* histoList2,    int rebinFactor, bool DoScale);
-TList*   divideHistogramList(TDirectoryFile* dir1, TDirectoryFile* dir2, int rebinFactor, bool DoScale);
-void     saveAllHistogramsToFile(const char* fileName, TList* histos);
+//int      getNumBins(double xmin, double xmax, int numBinsPerUnitX);
+//bool     compareHistograms(TH1* h1, TH1* h2);
+//TList*   divideHistogramList(TList* histoList1   , TList* histoList2,    int rebinFactor, bool DoScale);
+//TList*   divideHistogramList(TDirectoryFile* dir1, TDirectoryFile* dir2, int rebinFactor, bool DoScale);
+//void     saveAllHistogramsToFile(const char* fileName, TList* histos);
 
 using  std::string;
 using  std::cout;
