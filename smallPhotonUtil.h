@@ -1,6 +1,7 @@
 #ifndef SMALLPHOTONUTIL_H_
 #define SMALLPHOTONUTIL_H_
 
+#include <TCanvas.h>            // compiling macros give error if this is not included.
 #include <TCut.h>               // compiling macros give error if this is not included.
 #include <TDirectoryFile.h>     // compiling macros give error if this is not included.
 #include <TSystem.h>	        // compiling macros give error if this is not included.
