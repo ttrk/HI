@@ -262,7 +262,7 @@ void saveAllToImage2()
 {
 	const char* dirName="/home/kaya/Documents/cgate/output/out_HI/03042015";
 
-	vector<string> fileNames = getFileNames2(dirName,"root");
+	vector<string> fileNames = getFileNames(dirName,"root");
 
 	TFile* f;
 	for(int i=0; i < (int)fileNames.size(); i++)

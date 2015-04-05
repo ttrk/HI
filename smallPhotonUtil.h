@@ -18,11 +18,11 @@ TList*   getListOfSOMEKeys(TDirectoryFile* dir, const char* pattern);
 TList*   getListOfSOMEKeys(TDirectoryFile* dir, const char* pattern, const char* type);
 TList*   getListOfALLKeys (TDirectoryFile* dir);
 TList*   getListOfALLKeys (TDirectoryFile* dir, const char* type);
-TList*   getListOfHistograms   (TDirectoryFile* dir, const char* pattern);
+TList*   getListOfHistograms   (TDirectoryFile* dir, const char* pattern="");
 TList*   getListOfALLHistograms(TDirectoryFile* dir);
-void     saveAllHistogramsToPicture(TDirectoryFile* dir, const char* fileType, const char* directoryToBeSavedIn, int styleIndex, int rebin);
-void     saveAllHistogramsToPicture(TDirectoryFile* dir, const char* fileType, int dirType, int styleIndex, int rebin);
-void     saveAllCanvasesToPicture(TList* canvases, const char* fileType, const char* directoryToBeSavedIn);
+void     saveAllHistogramsToPicture(TDirectoryFile* dir, const char* fileType="gif", const char* directoryToBeSavedIn="", int styleIndex=0, int rebin=1);
+void     saveAllHistogramsToPicture(TDirectoryFile* dir, const char* fileType="gif", int dirType=0                        , int styleIndex=0, int rebin=1);
+void     saveAllCanvasesToPicture(TList* canvases      , const char* fileType="gif", const char* directoryToBeSavedIn="");
 Double_t getDR( Double_t eta1, Double_t phi1, Double_t eta2, Double_t phi2);
 Double_t getDPHI( Double_t phi1, Double_t phi2);
 Double_t getDETA(Double_t eta1, Double_t eta2);
@@ -64,8 +64,9 @@ void mergeCuts(TCut cut, TCut* cuts)
 
 /*
  * get list of all keys under a directory "dir" whose name contains "pattern"
+ * pattern = "" means any pattern, hence getListOfSOMEKeys(dir, "") is the same as getListOfALLKeys(dir).
  */
-TList* getListOfSOMEKeys(TDirectoryFile* dir, const char* pattern="")
+TList* getListOfSOMEKeys(TDirectoryFile* dir, const char* pattern)
 {
 	TList* keysInDir = dir->GetListOfKeys();
 	TIter* iter = new TIter(keysInDir);
@@ -98,8 +99,10 @@ TList* getListOfSOMEKeys(TDirectoryFile* dir, const char* pattern="")
 
 /*
  * get list of all keys under a directory "dir" for objects of a given "type" and whose name contains "pattern"
+ * type    = "" means any type   , hence getListOfSOMEKeys(dir, pattern, "") is the same as getListOfSOMEKeys(dir, pattern).
+ * pattern = "" means any pattern, hence getListOfSOMEKeys(dir, "", "") is the same as getListOfALLKeys(dir).
  */
-TList* getListOfSOMEKeys(TDirectoryFile* dir, const char* pattern="", const char* type="")
+TList* getListOfSOMEKeys(TDirectoryFile* dir, const char* pattern, const char* type /* ="" */ )
 {
 	TList* keysInDir = dir->GetListOfKeys();
 	TIter* iter = new TIter(keysInDir);
@@ -192,7 +195,7 @@ TList* getListOfALLKeys(TDirectoryFile* dir, const char* type)
  * get list of histograms under a directory "dir" for objects of a given "type"
  * the name of the histograms should contain the pattern
  */
-TList* getListOfHistograms(TDirectoryFile* dir, const char* pattern="")
+TList* getListOfHistograms(TDirectoryFile* dir, const char* pattern /* ="" */ )
 {
 	TList* histos=new TList();
 	TList* keysHisto = getListOfSOMEKeys(dir, pattern, "TH1D");
@@ -228,7 +231,7 @@ TList* getListOfALLHistograms(TDirectoryFile* dir)
 /*
  * save recursively all the histograms inside a TDirectoryFile "dir" to images
  */
-void saveAllHistogramsToPicture(TDirectoryFile* dir, const char* fileType="gif", const char* directoryToBeSavedIn="", int styleIndex=0, int rebin=1)
+void saveAllHistogramsToPicture(TDirectoryFile* dir, const char* fileType /* ="gif" */, const char* directoryToBeSavedIn /* ="" */, int styleIndex /* =0 */, int rebin /* =1 */)
 {
 	TList* keysHisto = getListOfALLKeys(dir, "TH1D");
 
@@ -278,7 +281,7 @@ void saveAllHistogramsToPicture(TDirectoryFile* dir, const char* fileType="gif",
  *	dirType = 3 				 --> save files under   /path/to/file/myFile
  *
  * */
-void saveAllHistogramsToPicture(TDirectoryFile* dir, const char* fileType="gif", int dirType=0, int styleIndex=0, int rebin=1)
+void saveAllHistogramsToPicture(TDirectoryFile* dir, const char* fileType /* ="gif" */, int dirType /* =0 */, int styleIndex /* =0 */, int rebin /* =1 */)
 {
 	const char* directoryToBeSavedIn="";
 
@@ -317,7 +320,7 @@ void saveAllHistogramsToPicture(TDirectoryFile* dir, const char* fileType="gif",
 /*
  * MODIFY THIS
  */
-void saveAllCanvasesToPicture(TList* canvases, const char* fileType="gif", const char* directoryToBeSavedIn="")
+void saveAllCanvasesToPicture(TList* canvases, const char* fileType /* ="gif" */, const char* directoryToBeSavedIn /* ="" */)
 {
 	TCanvas* c;
 	TIter* iter = new TIter(canvases);

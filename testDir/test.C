@@ -205,7 +205,7 @@ void testCompare()
 
 void test_getFileNames()
 {
-	std::vector<string> fileNames = getFileNames2("/home/kaya/Desktop","pdf");
+	std::vector<string> fileNames = getFileNames("/home/kaya/Desktop","pdf");
 
 	for(int i=0; i<fileNames.size(); i++)
 	{

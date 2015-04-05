@@ -11,11 +11,11 @@
 
 //#include <TCut.h>               // compiling macros give error if this is not included.
 
-//int      getNumBins(double xmin, double xmax, int numBinsPerUnitX);
-//bool     compareHistograms(TH1* h1, TH1* h2);
-//TList*   divideHistogramList(TList* histoList1   , TList* histoList2,    int rebinFactor, bool DoScale);
-//TList*   divideHistogramList(TDirectoryFile* dir1, TDirectoryFile* dir2, int rebinFactor, bool DoScale);
-//void     saveAllHistogramsToFile(const char* fileName, TList* histos);
+int      getNumBins(double xmin, double xmax, int numBinsPerUnitX);
+bool     compareHistograms(TH1* h1, TH1* h2);
+TList*   divideHistogramList(TList* histoList1   , TList* histoList2,    int rebinFactor=1, bool DoScale=true);
+TList*   divideHistogramList(TDirectoryFile* dir1, TDirectoryFile* dir2, int rebinFactor=1, bool DoScale=true);
+void     saveAllHistogramsToFile(const char* fileName, TList* histos);
 
 using  std::string;
 using  std::cout;
@@ -55,7 +55,7 @@ bool compareHistograms(TH1* h1, TH1* h2)
  *  "TH1::SetDefaultSumw2()" must have been run before creating the histograms in histoList1 and histoList2
  *
  */
-TList* divideHistogramList(TList* histoList1, TList* histoList2, int rebinFactor=1, bool DoScale=true)
+TList* divideHistogramList(TList* histoList1, TList* histoList2, int rebinFactor /* =1 */, bool DoScale /* =true */)
 {
 	TList* histos_Division=new TList();
 
@@ -101,7 +101,7 @@ TList* divideHistogramList(TList* histoList1, TList* histoList2, int rebinFactor
 /*
  *  divide histograms from 2 directories element wise
  */
-TList* divideHistogramList(TDirectoryFile* dir1, TDirectoryFile* dir2, int rebinFactor = 1, bool DoScale=true)
+TList* divideHistogramList(TDirectoryFile* dir1, TDirectoryFile* dir2, int rebinFactor /* =1 */, bool DoScale /* =true */)
 {
 	TList* histoList1=getListOfALLHistograms(dir1);
 	TList* histoList2=getListOfALLHistograms(dir2);

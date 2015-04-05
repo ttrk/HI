@@ -10,6 +10,9 @@ git remote add origin https://github.com/ttrk/HI.git   # the repository will be 
 #clone other repositories to the upper directory
 (cd ..; git clone https://github.com/CmsHI/HiForestAnalysis.git)
 (cd ..; git clone https://github.com/CmsHI/gammaJetAnalysis.git)
+#update other repositories to the upper directory
+(cd ../HiForestAnalysis; git pull)
+(cd ../gammaJetAnalysis; git pull)
 # how to run commands from another directory
 # http://superuser.com/questions/271986/execute-a-command-from-another-directory-in-bash
 

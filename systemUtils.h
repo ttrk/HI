@@ -18,8 +18,8 @@ using  std::string;
 using  std::cout;
 using  std::endl;
 
-TList*              getFileNames (const char* dirname, const char* ext);
-std::vector<string> getFileNames2(const char* dirname, const char* ext);
+TList*              getFileNamesList(const char* dirname=".", const char* ext="");
+std::vector<string> getFileNames    (const char* dirname=".", const char* ext="");
 
 /*
  * get a list files and folders in the given directory
@@ -40,7 +40,7 @@ std::vector<string> getFileNames2(const char* dirname, const char* ext);
 		cout     << tmpStr <<endl;
 	}
  */
-TList* getFileNames(const char *dirname=".", const char *ext="")
+TList* getFileNamesList(const char* dirname /* ="." */, const char* ext /* ="" */)
 {
    // ignore errors of Eclipse about TSystem objects
    TSystemDirectory dir(dirname, dirname);
@@ -68,7 +68,7 @@ TList* getFileNames(const char *dirname=".", const char *ext="")
    return outFileNames;
 }
 
-std::vector<string> getFileNames2(const char *dirname=".", const char *ext="")
+std::vector<string> getFileNames(const char* dirname /* ="." */, const char* ext /* ="" */)
 {
 	TSystemDirectory dir(dirname, dirname);
 	TList* files = dir.GetListOfFiles();
